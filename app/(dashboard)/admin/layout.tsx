@@ -1,6 +1,7 @@
 // app/(dashboard)/admin/layout.tsx
 import { requireRole } from "@/lib/auth-utils"
-import { AdminSidebar } from "@/components/dashboard/admin/admin-sidebar"
+import { DashboardLayout } from "@/components/shared/dashboard-layout"
+import { adminConfig } from "@/lib/dashboard-config"
 
 export default async function AdminLayout({
   children,
@@ -14,20 +15,16 @@ export default async function AdminLayout({
   ])
 
   return (
-    <div
-      style={{
-        display: "flex",
-        minHeight: "100vh",
-        background: "#f8fafc",
+    <DashboardLayout
+      config={adminConfig}
+      user={{
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        role: user.role,
       }}
     >
-      <AdminSidebar
-        firstName={user.firstName}
-        lastName={user.lastName}
-      />
-      <main style={{ flex: 1, overflow: "auto" }}>
-        {children}
-      </main>
-    </div>
+      {children}
+    </DashboardLayout>
   )
 }

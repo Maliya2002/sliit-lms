@@ -1,6 +1,7 @@
 // app/(dashboard)/admin/page.tsx
 import { requireRole } from "@/lib/auth-utils"
-import { AdminHeader } from "@/components/dashboard/admin/admin-header"
+import { adminConfig } from "@/lib/dashboard-config"
+import { DashboardHeader } from "@/components/shared/dashboard-header"
 import { AdminDashboardClient } from "@/components/dashboard/admin/admin-dashboard-client"
 import { db } from "@/lib/db"
 
@@ -11,7 +12,13 @@ export default async function AdminDashboard() {
     "COURSE_COORDINATOR",
   ])
 
-  // Real data from database!
+  const dashboardUser = {
+    firstName: user.firstName,
+    lastName: user.lastName,
+    email: user.email,
+    role: user.role,
+  }
+
   const [totalStudents, totalLecturers, totalCourses] =
     await Promise.all([
       db.user.count({ where: { role: "STUDENT" } }),
@@ -28,9 +35,10 @@ export default async function AdminDashboard() {
 
   return (
     <div>
-      <AdminHeader
-        firstName={user.firstName}
-        lastName={user.lastName}
+      <DashboardHeader
+        config={adminConfig}
+        user={dashboardUser}
+        subtitle="Manage your LMS system"
       />
       <AdminDashboardClient stats={stats} />
     </div>

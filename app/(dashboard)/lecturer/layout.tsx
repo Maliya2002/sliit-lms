@@ -1,6 +1,7 @@
 // app/(dashboard)/lecturer/layout.tsx
 import { requireRole } from "@/lib/auth-utils"
-import { LecturerSidebar } from "@/components/dashboard/lecturer/lecturer-sidebar"
+import { DashboardLayout } from "@/components/shared/dashboard-layout"
+import { lecturerConfig } from "@/lib/dashboard-config"
 
 export default async function LecturerLayout({
   children,
@@ -13,21 +14,16 @@ export default async function LecturerLayout({
   ])
 
   return (
-    <div
-      style={{
-        display: "flex",
-        minHeight: "100vh",
-        background: "#f8fafc",
+    <DashboardLayout
+      config={lecturerConfig}
+      user={{
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        role: user.role,
       }}
     >
-      <LecturerSidebar
-        firstName={user.firstName}
-        lastName={user.lastName}
-        email={user.email}
-      />
-      <main style={{ flex: 1, overflow: "auto" }}>
-        {children}
-      </main>
-    </div>
+      {children}
+    </DashboardLayout>
   )
 }

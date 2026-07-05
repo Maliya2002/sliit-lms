@@ -1,6 +1,7 @@
 // app/(dashboard)/lecturer/page.tsx
 import { requireRole } from "@/lib/auth-utils"
-import { LecturerHeader } from "@/components/dashboard/lecturer/lecturer-header"
+import { lecturerConfig } from "@/lib/dashboard-config"
+import { DashboardHeader } from "@/components/shared/dashboard-header"
 import { LecturerDashboardClient } from "@/components/dashboard/lecturer/lecturer-dashboard-client"
 
 export default async function LecturerDashboard() {
@@ -9,7 +10,13 @@ export default async function LecturerDashboard() {
     "TEACHING_ASSISTANT",
   ])
 
-  // Demo stats — will connect to real DB later
+  const dashboardUser = {
+    firstName: user.firstName,
+    lastName: user.lastName,
+    email: user.email,
+    role: user.role,
+  }
+
   const stats = {
     totalCourses: 4,
     totalStudents: 176,
@@ -19,9 +26,10 @@ export default async function LecturerDashboard() {
 
   return (
     <div>
-      <LecturerHeader
-        firstName={user.firstName}
-        lastName={user.lastName}
+      <DashboardHeader
+        config={lecturerConfig}
+        user={dashboardUser}
+        subtitle="Manage your courses and students"
       />
       <LecturerDashboardClient stats={stats} />
     </div>
