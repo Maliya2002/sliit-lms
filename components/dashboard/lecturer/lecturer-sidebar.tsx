@@ -118,13 +118,11 @@ const NAV_GROUPS = [
 interface Props {
   firstName: string
   lastName: string
-  email: string
 }
 
 export function LecturerSidebar({
   firstName,
   lastName,
-  email,
 }: Props) {
   const pathname = usePathname()
   const [collapsed, setCollapsed] = useState(false)

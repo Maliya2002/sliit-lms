@@ -1,7 +1,5 @@
-// app/(dashboard)/student/layout.tsx
 import { requireRole } from "@/lib/auth-utils"
-import { DashboardLayout } from "@/components/shared/dashboard-layout"
-import { studentConfig } from "@/lib/dashboard-config"
+import { StudentLayoutClient } from "@/components/dashboard/student/student-layout-client"
 
 export default async function StudentLayout({
   children,
@@ -11,8 +9,7 @@ export default async function StudentLayout({
   const user = await requireRole(["STUDENT"])
 
   return (
-    <DashboardLayout
-      config={studentConfig}
+    <StudentLayoutClient
       user={{
         firstName: user.firstName,
         lastName: user.lastName,
@@ -21,6 +18,6 @@ export default async function StudentLayout({
       }}
     >
       {children}
-    </DashboardLayout>
+    </StudentLayoutClient>
   )
 }

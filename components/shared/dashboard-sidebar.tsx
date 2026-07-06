@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { usePathname } from "next/navigation"
 import { signOut } from "next-auth/react"
 import {
@@ -24,7 +24,21 @@ export function DashboardSidebar({ config, user }: Props) {
   const [collapsed, setCollapsed] = useState(false)
   const { theme, navigation } = config
 
-  // Logo icon based on role
+  // Auto-collapse on tablet
+  useEffect(() => {
+    const check = () => {
+      const width = window.innerWidth
+      if (width >= 768 && width < 1024) {
+        setCollapsed(true)
+      } else if (width >= 1024) {
+        setCollapsed(false)
+      }
+    }
+    check()
+    window.addEventListener("resize", check)
+    return () => window.removeEventListener("resize", check)
+  }, [])
+
   const LogoIcon =
     config.role === "ADMIN"
       ? Shield

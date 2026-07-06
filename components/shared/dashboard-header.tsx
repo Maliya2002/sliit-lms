@@ -1,6 +1,7 @@
 "use client"
 
 import { Bell, Search } from "lucide-react"
+import { useIsMobile } from "@/hooks/use-mobile"
 import type { DashboardConfig, DashboardUser } from "@/types/dashboard"
 
 interface Props {
@@ -10,8 +11,14 @@ interface Props {
   subtitle?: string
 }
 
-export function DashboardHeader({ config, user, title, subtitle }: Props) {
+export function DashboardHeader({
+  config,
+  user,
+  title,
+  subtitle,
+}: Props) {
   const { theme } = config
+  const { isMobile } = useIsMobile()
 
   const hour = new Date().getHours()
   const greeting =
@@ -21,9 +28,13 @@ export function DashboardHeader({ config, user, title, subtitle }: Props) {
       ? "Good Afternoon"
       : "Good Evening"
 
-  const displayTitle = title || `${greeting}, ${user.firstName}! 👋`
+  const displayTitle =
+    title || `${greeting}, ${user.firstName}! 👋`
   const displaySubtitle =
     subtitle || "Welcome back to your dashboard"
+
+  // On mobile, header is handled by MobileTopBar
+  if (isMobile) return null
 
   return (
     <header
@@ -71,7 +82,6 @@ export function DashboardHeader({ config, user, title, subtitle }: Props) {
           gap: "12px",
         }}
       >
-        {/* Search */}
         <div
           style={{
             display: "flex",
@@ -97,7 +107,6 @@ export function DashboardHeader({ config, user, title, subtitle }: Props) {
           />
         </div>
 
-        {/* Bell */}
         <div
           style={{
             position: "relative",
@@ -127,7 +136,6 @@ export function DashboardHeader({ config, user, title, subtitle }: Props) {
           />
         </div>
 
-        {/* Avatar */}
         <div
           style={{
             width: "40px",

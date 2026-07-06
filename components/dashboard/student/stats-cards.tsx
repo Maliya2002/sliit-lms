@@ -1,6 +1,7 @@
 "use client"
 
 import { BookOpen, FileText, Calendar, TrendingUp } from "lucide-react"
+import { useIsMobile } from "@/hooks/use-mobile"
 
 interface Props {
   totalCourses: number
@@ -15,13 +16,17 @@ export function StatsCards({
   attendancePercent,
   gpa,
 }: Props) {
+  const { isMobile, isTablet } = useIsMobile()
+
+  const cols = isMobile ? 2 : isTablet ? 2 : 4
+
   return (
     <div
       style={{
         display: "grid",
-        gridTemplateColumns: "repeat(4, 1fr)",
-        gap: "20px",
-        marginBottom: "28px",
+        gridTemplateColumns: `repeat(${cols}, 1fr)`,
+        gap: isMobile ? "12px" : "20px",
+        marginBottom: "24px",
       }}
     >
       <Card
@@ -74,47 +79,47 @@ function Card({
       style={{
         background: "white",
         borderRadius: "16px",
-        padding: "24px",
+        padding: "20px",
         border: "1px solid #f1f5f9",
         boxShadow: "0 1px 4px rgba(0,0,0,0.04)",
       }}
     >
       <div
         style={{
-          width: "44px",
-          height: "44px",
-          borderRadius: "12px",
+          width: "40px",
+          height: "40px",
+          borderRadius: "10px",
           background: iconBg,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          marginBottom: "16px",
+          marginBottom: "12px",
         }}
       >
         {icon}
       </div>
       <div
         style={{
-          fontSize: "32px",
+          fontSize: "28px",
           fontWeight: "800",
           color: "#1e293b",
           lineHeight: 1,
-          marginBottom: "6px",
+          marginBottom: "4px",
         }}
       >
         {value}
       </div>
       <div
         style={{
-          fontSize: "14px",
+          fontSize: "13px",
           fontWeight: "600",
           color: "#1e293b",
-          marginBottom: "4px",
+          marginBottom: "2px",
         }}
       >
         {title}
       </div>
-      <div style={{ fontSize: "12px", color: "#94a3b8" }}>
+      <div style={{ fontSize: "11px", color: "#94a3b8" }}>
         {desc}
       </div>
     </div>

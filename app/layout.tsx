@@ -4,17 +4,11 @@ import { Inter } from "next/font/google"
 import "./globals.css"
 import { SessionProvider } from "next-auth/react"
 
-// ─────────────────────────────────────────
-// Font Setup
-// ─────────────────────────────────────────
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-inter",
 })
 
-// ─────────────────────────────────────────
-// SEO Metadata
-// ─────────────────────────────────────────
 export const metadata: Metadata = {
   title: {
     default: "SLIIT LMS",
@@ -25,23 +19,22 @@ export const metadata: Metadata = {
   keywords: ["SLIIT", "LMS", "Learning", "Education"],
 }
 
-// ─────────────────────────────────────────
-// Root Layout
-// ─────────────────────────────────────────
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html
+      lang="en"
+      suppressHydrationWarning
+      data-scroll-behavior="smooth"
+    >
       <body
         className={`${inter.variable} font-sans antialiased`}
         suppressHydrationWarning
       >
-        <SessionProvider>
-          {children}
-        </SessionProvider>
+        <SessionProvider>{children}</SessionProvider>
       </body>
     </html>
   )

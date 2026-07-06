@@ -1,5 +1,6 @@
 "use client"
 
+import { useIsMobile } from "@/hooks/use-mobile"
 import { StatsCards } from "./stats-cards"
 import { MyCourses } from "./my-courses"
 import { UpcomingDeadlines } from "./upcoming-deadlines"
@@ -14,8 +15,10 @@ interface Props {
 }
 
 export function DashboardClient({ stats }: Props) {
+  const { isMobile } = useIsMobile()
+
   return (
-    <div style={{ padding: "28px" }}>
+    <div style={{ padding: isMobile ? "16px" : "28px" }}>
       <StatsCards
         totalCourses={stats.totalCourses}
         pendingAssignments={stats.pendingAssignments}
@@ -25,7 +28,7 @@ export function DashboardClient({ stats }: Props) {
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "1.5fr 1fr",
+          gridTemplateColumns: isMobile ? "1fr" : "1.5fr 1fr",
           gap: "20px",
         }}
       >
