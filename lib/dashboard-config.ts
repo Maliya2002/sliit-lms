@@ -45,7 +45,16 @@ export const studentConfig: DashboardConfig = {
     {
       label: "Account",
       items: [
-        { label: "Settings", href: "/student/settings", icon: "Settings" },
+        {
+          label: "My Profile",
+          href: "/student/profile",
+          icon: "User",
+        },
+        {
+          label: "Settings",
+          href: "/student/settings",
+          icon: "Settings",
+        },
       ],
     },
   ],

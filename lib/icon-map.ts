@@ -18,6 +18,7 @@ import {
   ScrollText,
   Video,
   Shield,
+  User,
   type LucideIcon,
 } from "lucide-react"
 
@@ -38,6 +39,7 @@ const ICON_MAP: Record<string, LucideIcon> = {
   ScrollText,
   Video,
   Shield,
+  User,
 }
 
 export function getIcon(name: string): LucideIcon {

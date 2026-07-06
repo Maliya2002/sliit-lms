@@ -1,14 +1,13 @@
 // components/auth/login-form.tsx
 "use client"
 
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { signIn } from "next-auth/react"
 import { useRouter, useSearchParams } from "next/navigation"
 
-// ── Validation Schema ──
 const loginSchema = z.object({
   email: z
     .string()
@@ -26,11 +25,24 @@ export function LoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const callbackUrl = searchParams.get("callbackUrl")
+  const registered = searchParams.get("registered")
+  const reset = searchParams.get("reset")
 
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
+
+  // ── Derive info message from URL params (no useEffect needed) ──
+  const infoMessage = useMemo(() => {
+    if (registered === "true") {
+      return "Account created successfully! Please sign in."
+    }
+    if (reset === "success") {
+      return "Password reset successfully! Please sign in with your new password."
+    }
+    return null
+  }, [registered, reset])
 
   const {
     register,
@@ -58,16 +70,11 @@ export function LoginForm() {
 
       setSuccess(true)
 
-      // Wait for session to be set
       await new Promise((r) => setTimeout(r, 800))
 
-      // Get session
       const res = await fetch("/api/auth/session")
       const session = await res.json()
       const role = session?.user?.role
-
-      console.log("✅ Session:", session)
-      console.log("✅ Role:", role)
 
       const map: Record<string, string> = {
         ADMIN: "/admin",
@@ -79,11 +86,8 @@ export function LoginForm() {
       }
 
       const dest = callbackUrl || map[role] || "/student"
-      console.log("✅ Redirecting to:", dest)
-
       router.push(dest)
       router.refresh()
-
     } catch (err) {
       console.error(err)
       setError("Something went wrong. Try again.")
@@ -94,6 +98,23 @@ export function LoginForm() {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
+
+      {/* Info Message */}
+      {infoMessage && !success && (
+        <div
+          style={{
+            background: "#f0fdf4",
+            border: "1px solid #bbf7d0",
+            color: "#16a34a",
+            padding: "12px 16px",
+            borderRadius: "10px",
+            fontSize: "14px",
+            marginBottom: "16px",
+          }}
+        >
+          ✅ {infoMessage}
+        </div>
+      )}
 
       {/* Error */}
       {error && (
@@ -150,7 +171,9 @@ export function LoginForm() {
           style={{
             width: "100%",
             padding: "12px 16px",
-            border: `1px solid ${errors.email ? "#ef4444" : "#e2e8f0"}`,
+            border: `1px solid ${
+              errors.email ? "#ef4444" : "#e2e8f0"
+            }`,
             borderRadius: "10px",
             fontSize: "14px",
             color: "#1e293b",
@@ -160,14 +183,20 @@ export function LoginForm() {
           }}
         />
         {errors.email && (
-          <p style={{ color: "#ef4444", fontSize: "12px", marginTop: "4px" }}>
+          <p
+            style={{
+              color: "#ef4444",
+              fontSize: "12px",
+              marginTop: "4px",
+            }}
+          >
             {errors.email.message}
           </p>
         )}
       </div>
 
       {/* Password */}
-      <div style={{ marginBottom: "16px" }}>
+      <div style={{ marginBottom: "20px" }}>
         <div
           style={{
             display: "flex",
@@ -196,6 +225,7 @@ export function LoginForm() {
             Forgot password?
           </a>
         </div>
+
         <div style={{ position: "relative" }}>
           <input
             {...register("password")}
@@ -205,7 +235,9 @@ export function LoginForm() {
             style={{
               width: "100%",
               padding: "12px 48px 12px 16px",
-              border: `1px solid ${errors.password ? "#ef4444" : "#e2e8f0"}`,
+              border: `1px solid ${
+                errors.password ? "#ef4444" : "#e2e8f0"
+              }`,
               borderRadius: "10px",
               fontSize: "14px",
               color: "#1e293b",
@@ -233,14 +265,21 @@ export function LoginForm() {
             {showPassword ? "Hide" : "Show"}
           </button>
         </div>
+
         {errors.password && (
-          <p style={{ color: "#ef4444", fontSize: "12px", marginTop: "4px" }}>
+          <p
+            style={{
+              color: "#ef4444",
+              fontSize: "12px",
+              marginTop: "4px",
+            }}
+          >
             {errors.password.message}
           </p>
         )}
       </div>
 
-      {/* Submit Button */}
+      {/* Submit */}
       <button
         type="submit"
         disabled={isLoading || success}
