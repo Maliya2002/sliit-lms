@@ -527,7 +527,6 @@ async function main() {
     },
   })
   console.log("✅ Quiz:", quiz3.title, "(Draft)")
-
   // ─────────────────────────────────────
   // 8. Sample Submission
   // ─────────────────────────────────────
@@ -550,6 +549,56 @@ async function main() {
   console.log("✅ Sample submission created")
 
   // ─────────────────────────────────────
+  // 9. Sample Notifications
+  // ─────────────────────────────────────
+  await prismaClient.notification.createMany({
+    data: [
+      {
+        userId: student.id,
+        title: "📝 New Assignment Posted",
+        message:
+          "Software Design Document has been posted for SE3040. Due in 7 days.",
+        type: "ASSIGNMENT",
+        isRead: false,
+        link: "/student/assignments",
+      },
+      {
+        userId: student.id,
+        title: "📊 Quiz Published",
+        message:
+          "Database Fundamentals Quiz is now available. You have 30 minutes.",
+        type: "QUIZ",
+        isRead: false,
+        link: "/student/quizzes",
+      },
+      {
+        userId: student.id,
+        title: "📢 Announcement",
+        message:
+          "Welcome to the new semester! Please check your course schedules.",
+        type: "ANNOUNCEMENT",
+        isRead: true,
+        link: "/student/notifications",
+      },
+    ],
+  })
+  console.log("✅ Sample notifications created")
+
+  // ─────────────────────────────────────
+  // 10. Sample Global Announcement
+  // ─────────────────────────────────────
+  await prismaClient.announcement.create({
+    data: {
+      title: "Welcome to Semester 2 — 2024/2025",
+      content:
+        "Dear Students,\n\nWelcome to the new semester! Please check your course registrations and timetable.\n\nBest regards,\nAcademic Affairs",
+      isGlobal: true,
+      authorId: admin.id,
+    },
+  })
+  console.log("✅ Sample announcement created")
+
+  // ─────────────────────────────────────
   // Done
   // ─────────────────────────────────────
   console.log("\n🎉 Seeding completed!\n")
@@ -564,6 +613,8 @@ async function main() {
   console.log("📊 Quizzes: 3 (2 Published + 1 Draft)")
   console.log("📝 Assignments: 3 (All Published)")
   console.log("👥 Enrollments: 5")
+  console.log("🔔 Notifications: 3")
+  console.log("📢 Announcements: 1")
   console.log("──────────────────────────────────────")
 }
 

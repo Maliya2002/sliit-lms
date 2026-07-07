@@ -1,8 +1,9 @@
 "use client"
 
-import { Bell, Search } from "lucide-react"
+import { Search } from "lucide-react"
 import { useIsMobile } from "@/hooks/use-mobile"
 import type { DashboardConfig, DashboardUser } from "@/types/dashboard"
+import { NotificationBell } from "@/components/notifications/notification-bell"
 
 interface Props {
   config: DashboardConfig
@@ -107,35 +108,7 @@ export function DashboardHeader({
           />
         </div>
 
-        <div
-          style={{
-            position: "relative",
-            width: "40px",
-            height: "40px",
-            borderRadius: "10px",
-            background: "#f8fafc",
-            border: "1px solid #e2e8f0",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            cursor: "pointer",
-          }}
-        >
-          <Bell size={18} color="#64748b" />
-          <div
-            style={{
-              position: "absolute",
-              top: "8px",
-              right: "8px",
-              width: "8px",
-              height: "8px",
-              background: theme.primary,
-              borderRadius: "50%",
-              border: "2px solid white",
-            }}
-          />
-        </div>
-
+       <NotificationBell />
         <div
           style={{
             width: "40px",
