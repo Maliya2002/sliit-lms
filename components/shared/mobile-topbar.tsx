@@ -5,6 +5,7 @@ import { motion } from "framer-motion"
 import { Menu, GraduationCap, Shield, BookOpen } from "lucide-react"
 import { NotificationBell } from "@/components/notifications/notification-bell"
 import type { DashboardConfig, DashboardUser } from "@/types/dashboard"
+import { ThemeToggle } from "@/components/theme-toggle"
 
 interface Props {
   config: DashboardConfig
@@ -129,6 +130,7 @@ export function MobileTopBar({ config, user, onMenuClick }: Props) {
           gap: "10px",
         }}
       >
+        <ThemeToggle />
         <NotificationBell />
 
         <motion.div

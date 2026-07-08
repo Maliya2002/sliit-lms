@@ -1,13 +1,74 @@
 @import "tailwindcss";
 
+/* ─────────────────────────────────────────
+   CSS Custom Properties — Light + Dark
+   ───────────────────────────────────────── */
+
 :root {
-  --background: 0 0% 100%;
-  --foreground: 222.2 84% 4.9%;
-  --primary: 221.2 83.2% 53.3%;
-  --primary-foreground: 210 40% 98%;
-  --radius: 0.5rem;
+  /* Background */
+  --bg-primary: #F8FAFC;
+  --bg-secondary: #FFFFFF;
+  --bg-card: #FFFFFF;
+  --bg-sidebar: #0F172A;
+  --bg-input: #F8FAFC;
+  --bg-hover: #F1F5F9;
+
+  /* Text */
+  --text-primary: #0F172A;
+  --text-secondary: #475569;
+  --text-muted: #94A3B8;
+  --text-inverse: #FFFFFF;
+
+  /* Borders */
+  --border-color: #E2E8F0;
+  --border-light: #F1F5F9;
+  --border-focus: #0066FF;
+
+  /* Brand */
+  --brand-primary: #0066FF;
+  --brand-secondary: #6C3AED;
+  --brand-gradient: linear-gradient(135deg, #0066FF, #6C3AED);
+  --brand-success: #059669;
+  --brand-warning: #F59E0B;
+  --brand-danger: #E11D48;
+
+  /* Shadows */
+  --shadow-sm: 0 2px 8px rgba(0,0,0,0.04);
+  --shadow-md: 0 8px 24px rgba(0,0,0,0.08);
+  --shadow-lg: 0 16px 40px rgba(0,0,0,0.12);
+
+  /* Misc */
+  --card-radius: 20px;
+  --input-radius: 14px;
   --font-inter: "Inter", system-ui, sans-serif;
 }
+
+/* Dark Mode Variables */
+.dark {
+  --bg-primary: #0B0F1A;
+  --bg-secondary: #111827;
+  --bg-card: #1E293B;
+  --bg-sidebar: #0A0E1A;
+  --bg-input: #1E293B;
+  --bg-hover: #1E293B;
+
+  --text-primary: #F1F5F9;
+  --text-secondary: #94A3B8;
+  --text-muted: #64748B;
+  --text-inverse: #0F172A;
+
+  --border-color: rgba(255,255,255,0.08);
+  --border-light: rgba(255,255,255,0.04);
+  --border-focus: #0066FF;
+
+  --shadow-sm: 0 2px 8px rgba(0,0,0,0.3);
+  --shadow-md: 0 8px 24px rgba(0,0,0,0.4);
+  --shadow-lg: 0 16px 40px rgba(0,0,0,0.5);
+}
+
+/* ─────────────────────────────────────────
+   Base Styles
+   ───────────────────────────────────────── */
 
 *,
 *::before,
@@ -25,50 +86,50 @@ html {
 
 body {
   font-family: var(--font-inter);
-  background-color: #F8FAFC;
-  color: #0F172A;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* Custom scrollbar */
+/* Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #F1F5F9;
+  background: var(--bg-hover);
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #0066FF, #6C3AED);
+  background: var(--brand-gradient);
   border-radius: 3px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #0066FF;
 }
 
 /* Selection */
 ::selection {
   background: rgba(0, 102, 255, 0.15);
-  color: #0066FF;
+  color: var(--brand-primary);
 }
 
-/* Focus ring */
+/* Focus */
 :focus-visible {
-  outline: 2px solid #0066FF;
+  outline: 2px solid var(--brand-primary);
   outline-offset: 2px;
   border-radius: 6px;
 }
 
 /* Smooth transitions */
-a,
-button {
+a, button {
   transition: all 0.15s ease;
 }
 
-/* Remove default button styles */
 button {
   font-family: inherit;
+}
+
+/* Dark mode transition */
+* {
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.15s ease;
 }

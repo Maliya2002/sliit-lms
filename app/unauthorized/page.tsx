@@ -1,8 +1,13 @@
 // app/unauthorized/page.tsx
+"use client"
+
+import { motion } from "framer-motion"
 import { Lock, Home, LogIn } from "lucide-react"
-import Link from "next/link"
+import { useDarkMode } from "@/hooks/use-dark-mode"
 
 export default function UnauthorizedPage() {
+  const { bg, text, border } = useDarkMode()
+
   return (
     <div
       style={{
@@ -11,112 +16,149 @@ export default function UnauthorizedPage() {
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
-        background: "#f8fafc",
+        background: bg.primary,
         padding: "24px",
         textAlign: "center",
+        transition: "background 0.3s ease",
       }}
     >
       {/* Icon */}
-      <div
+      <motion.div
+        initial={{ opacity: 0, scale: 0.5 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ type: "spring", stiffness: 200 }}
         style={{
           width: "90px",
           height: "90px",
           borderRadius: "24px",
-          background: "#fef2f2",
+          background:
+            "linear-gradient(135deg, #FFF1F2, #FFE4E6)",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
           marginBottom: "28px",
-          border: "1px solid #fecaca",
+          border: "1px solid #FECDD3",
+          boxShadow: "0 8px 24px rgba(225,29,72,0.15)",
         }}
       >
-        <Lock size={44} color="#dc2626" />
-      </div>
+        <Lock size={44} color="#E11D48" />
+      </motion.div>
 
-      {/* Code */}
-      <div
+      {/* Badge */}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1 }}
         style={{
-          fontSize: "13px",
+          fontSize: "12px",
           fontWeight: "700",
-          color: "#dc2626",
+          color: "#E11D48",
           letterSpacing: "0.1em",
           marginBottom: "16px",
-          background: "#fef2f2",
-          padding: "4px 12px",
+          background: "rgba(225,29,72,0.1)",
+          padding: "6px 16px",
           borderRadius: "20px",
+          border: "1px solid rgba(225,29,72,0.2)",
         }}
       >
         ERROR 403 — FORBIDDEN
-      </div>
+      </motion.div>
 
       {/* Title */}
-      <h1
+      <motion.h1
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2 }}
         style={{
-          fontSize: "28px",
-          fontWeight: "800",
-          color: "#1e293b",
+          fontSize: "32px",
+          fontWeight: "900",
+          color: text.primary,
           marginBottom: "12px",
+          letterSpacing: "-0.02em",
         }}
       >
         Access Denied
-      </h1>
+      </motion.h1>
 
       {/* Description */}
-      <p
+      <motion.p
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3 }}
         style={{
           fontSize: "16px",
-          color: "#64748b",
+          color: text.secondary,
           maxWidth: "420px",
           lineHeight: 1.7,
           marginBottom: "12px",
         }}
       >
-        You don&apos;t have permission to access this page. This
-        area is restricted to authorized users only.
-      </p>
+        You don&apos;t have permission to access this page.
+        This area is restricted to authorized users only.
+      </motion.p>
 
-      <p
+      <motion.p
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.4 }}
         style={{
           fontSize: "14px",
-          color: "#94a3b8",
+          color: text.muted,
           marginBottom: "40px",
         }}
       >
-        If you believe this is a mistake, please contact your
-        administrator.
-      </p>
+        If you believe this is a mistake, please contact
+        your administrator.
+      </motion.p>
 
       {/* Buttons */}
-      <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", justifyContent: "center" }}>
-        <a
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.5 }}
+        style={{
+          display: "flex",
+          gap: "12px",
+          flexWrap: "wrap",
+          justifyContent: "center",
+        }}
+      >
+        <motion.a
           href="/login"
+          whileHover={{ scale: 1.04 }}
+          whileTap={{ scale: 0.97 }}
           style={{
             display: "flex",
             alignItems: "center",
             gap: "8px",
             padding: "13px 28px",
-            background: "#2563eb",
+            background:
+              "linear-gradient(135deg, #0066FF, #6C3AED)",
             color: "white",
-            borderRadius: "12px",
+            borderRadius: "14px",
             fontSize: "15px",
-            fontWeight: "600",
+            fontWeight: "700",
             textDecoration: "none",
+            boxShadow: "0 4px 16px rgba(0,102,255,0.3)",
           }}
         >
           <LogIn size={16} />
-          Sign In with Different Account
-        </a>
-        <Link
+          Sign In
+        </motion.a>
+
+        <motion.a
           href="/"
+          whileHover={{ scale: 1.04 }}
+          whileTap={{ scale: 0.97 }}
           style={{
             display: "flex",
             alignItems: "center",
             gap: "8px",
             padding: "13px 28px",
-            background: "white",
-            color: "#1e293b",
-            border: "1px solid #e2e8f0",
-            borderRadius: "12px",
+            background: bg.card,
+            color: text.primary,
+            border: `1.5px solid ${border.strong}`,
+            borderRadius: "14px",
             fontSize: "15px",
             fontWeight: "600",
             textDecoration: "none",
@@ -124,8 +166,8 @@ export default function UnauthorizedPage() {
         >
           <Home size={16} />
           Go Home
-        </Link>
-      </div>
+        </motion.a>
+      </motion.div>
     </div>
   )
 }

@@ -3,8 +3,9 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { motion } from "framer-motion"
+import { motion, AnimatePresence } from "framer-motion"
 import { GraduationCap, Menu, X } from "lucide-react"
+import { ThemeToggle } from "@/components/theme-toggle"
 
 export function Navbar() {
   const router = useRouter()
@@ -16,14 +17,12 @@ export function Navbar() {
       setScrolled(window.scrollY > 20)
     }
     window.addEventListener("scroll", handleScroll)
-    return () =>
-      window.removeEventListener("scroll", handleScroll)
+    return () => window.removeEventListener("scroll", handleScroll)
   }, [])
 
   const navLinks = [
     { label: "Features", href: "#features" },
     { label: "How It Works", href: "#how-it-works" },
-    { label: "Testimonials", href: "#testimonials" },
   ]
 
   return (
@@ -113,7 +112,7 @@ export function Navbar() {
           style={{
             display: "flex",
             alignItems: "center",
-            gap: "32px",
+            gap: "16px",
           }}
           className="desktop-nav"
         >
@@ -135,6 +134,9 @@ export function Navbar() {
               {link.label}
             </motion.a>
           ))}
+
+          {/* ✅ ThemeToggle is a sibling, NOT inside another button */}
+          <ThemeToggle />
 
           <motion.button
             whileHover={{ scale: 1.05 }}
@@ -202,85 +204,98 @@ export function Navbar() {
       </div>
 
       {/* Mobile Menu */}
-      {mobileOpen && (
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          style={{
-            position: "absolute",
-            top: "72px",
-            left: 0,
-            right: 0,
-            background: "white",
-            padding: "20px",
-            boxShadow: "0 8px 32px rgba(0,0,0,0.1)",
-            borderBottom: "1px solid #e2e8f0",
-          }}
-        >
-          {navLinks.map((link) => (
-            <a
-              key={link.label}
-              href={link.href}
-              onClick={() => setMobileOpen(false)}
-              style={{
-                display: "block",
-                padding: "14px 0",
-                fontSize: "16px",
-                fontWeight: "500",
-                color: "#0F172A",
-                textDecoration: "none",
-                borderBottom: "1px solid #f1f5f9",
-              }}
-            >
-              {link.label}
-            </a>
-          ))}
-
-          <div
+      <AnimatePresence>
+        {mobileOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
             style={{
-              display: "flex",
-              gap: "12px",
-              marginTop: "16px",
+              position: "absolute",
+              top: "72px",
+              left: 0,
+              right: 0,
+              background: "white",
+              padding: "20px",
+              boxShadow: "0 8px 32px rgba(0,0,0,0.1)",
+              borderBottom: "1px solid #e2e8f0",
             }}
           >
-            <button
-              onClick={() => router.push("/login")}
-              style={{
-                flex: 1,
-                padding: "12px",
-                background: "white",
-                color: "#0066FF",
-                border: "1.5px solid #0066FF",
-                borderRadius: "10px",
-                fontSize: "14px",
-                fontWeight: "600",
-                cursor: "pointer",
-              }}
-            >
-              Sign In
-            </button>
-            <button
-              onClick={() => router.push("/register")}
-              style={{
-                flex: 1,
-                padding: "12px",
-                background:
-                  "linear-gradient(135deg, #0066FF, #6C3AED)",
-                color: "white",
-                border: "none",
-                borderRadius: "10px",
-                fontSize: "14px",
-                fontWeight: "600",
-                cursor: "pointer",
-              }}
-            >
-              Get Started
-            </button>
-          </div>
-        </motion.div>
-      )}
+            {navLinks.map((link) => (
+              <a
+                key={link.label}
+                href={link.href}
+                onClick={() => setMobileOpen(false)}
+                style={{
+                  display: "block",
+                  padding: "14px 0",
+                  fontSize: "16px",
+                  fontWeight: "500",
+                  color: "#0F172A",
+                  textDecoration: "none",
+                  borderBottom: "1px solid #f1f5f9",
+                }}
+              >
+                {link.label}
+              </a>
+            ))}
 
-      {/* CSS for responsive */}
+            {/* Mobile theme toggle row */}
+            <div
+              style={{
+                marginTop: "16px",
+                marginBottom: "16px",
+                display: "flex",
+                justifyContent: "flex-start",
+              }}
+            >
+              <ThemeToggle />
+            </div>
+
+            <div
+              style={{
+                display: "flex",
+                gap: "12px",
+              }}
+            >
+              <button
+                onClick={() => router.push("/login")}
+                style={{
+                  flex: 1,
+                  padding: "12px",
+                  background: "white",
+                  color: "#0066FF",
+                  border: "1.5px solid #0066FF",
+                  borderRadius: "10px",
+                  fontSize: "14px",
+                  fontWeight: "600",
+                  cursor: "pointer",
+                }}
+              >
+                Sign In
+              </button>
+              <button
+                onClick={() => router.push("/register")}
+                style={{
+                  flex: 1,
+                  padding: "12px",
+                  background:
+                    "linear-gradient(135deg, #0066FF, #6C3AED)",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "10px",
+                  fontSize: "14px",
+                  fontWeight: "600",
+                  cursor: "pointer",
+                }}
+              >
+                Get Started
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <style>{`
         @media (max-width: 768px) {
           .desktop-nav { display: none !important; }

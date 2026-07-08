@@ -2,6 +2,7 @@
 "use client"
 
 import { motion } from "framer-motion"
+import { useDarkMode } from "@/hooks/use-dark-mode"
 import { LecturerStats } from "./lecturer-stats"
 import { TeachingCourses } from "./teaching-courses"
 import { RecentSubmissions } from "./recent-submissions"
@@ -17,15 +18,17 @@ interface Props {
 }
 
 export function LecturerDashboardClient({ stats }: Props) {
+  const { bg } = useDarkMode()
+
   return (
     <div
       style={{
         padding: "28px 32px",
-        background: "#F8FAFC",
+        background: bg.primary,
         minHeight: "calc(100vh - 76px)",
+        transition: "background 0.3s ease",
       }}
     >
-      {/* Stats */}
       <LecturerStats
         totalCourses={stats.totalCourses}
         totalStudents={stats.totalStudents}
@@ -33,7 +36,6 @@ export function LecturerDashboardClient({ stats }: Props) {
         dueSoon={stats.dueSoon}
       />
 
-      {/* Main Grid */}
       <div
         style={{
           display: "grid",
@@ -41,7 +43,6 @@ export function LecturerDashboardClient({ stats }: Props) {
           gap: "24px",
         }}
       >
-        {/* Left */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -49,8 +50,6 @@ export function LecturerDashboardClient({ stats }: Props) {
         >
           <TeachingCourses />
         </motion.div>
-
-        {/* Right */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}

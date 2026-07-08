@@ -1,11 +1,14 @@
+// app/not-found.tsx
 "use client"
 
 import { useRouter } from "next/navigation"
+import { motion } from "framer-motion"
 import { Home, ArrowLeft } from "lucide-react"
-import Link from "next/link"
+import { useDarkMode } from "@/hooks/use-dark-mode"
 
 export default function NotFound() {
   const router = useRouter()
+  const { bg, text, border } = useDarkMode()
 
   return (
     <div
@@ -15,90 +18,121 @@ export default function NotFound() {
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
-        background: "#f8fafc",
+        background: bg.primary,
         padding: "24px",
         textAlign: "center",
+        transition: "background 0.3s ease",
       }}
     >
-      <div
+      {/* 404 Number */}
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
         style={{
-          fontSize: "120px",
+          fontSize: "clamp(80px, 15vw, 140px)",
           fontWeight: "900",
-          background: "linear-gradient(135deg, #2563eb, #7c3aed)",
+          background:
+            "linear-gradient(135deg, #0066FF, #6C3AED)",
           WebkitBackgroundClip: "text",
           WebkitTextFillColor: "transparent",
           lineHeight: 1,
           marginBottom: "24px",
+          letterSpacing: "-0.04em",
         }}
       >
         404
-      </div>
+      </motion.div>
 
-      <h1
+      {/* Title */}
+      <motion.h1
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1 }}
         style={{
           fontSize: "28px",
           fontWeight: "800",
-          color: "#1e293b",
+          color: text.primary,
           marginBottom: "12px",
+          letterSpacing: "-0.02em",
         }}
       >
         Page Not Found
-      </h1>
+      </motion.h1>
 
-      <p
+      {/* Description */}
+      <motion.p
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2 }}
         style={{
           fontSize: "16px",
-          color: "#64748b",
+          color: text.muted,
           maxWidth: "420px",
           lineHeight: 1.7,
           marginBottom: "40px",
         }}
       >
-        The page you are looking for doesn&apos;t exist or has been
-        moved. Please check the URL or go back to the home page.
-      </p>
+        The page you are looking for doesn&apos;t exist or
+        has been moved. Please check the URL or go back to
+        the home page.
+      </motion.p>
 
-      <div style={{ display: "flex", gap: "12px" }}>
-        <button
-          type="button"
+      {/* Buttons */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3 }}
+        style={{ display: "flex", gap: "12px" }}
+      >
+        <motion.button
+          whileHover={{ scale: 1.04 }}
+          whileTap={{ scale: 0.97 }}
           onClick={() => router.back()}
           style={{
             display: "flex",
             alignItems: "center",
             gap: "8px",
             padding: "13px 28px",
-            background: "white",
-            color: "#1e293b",
-            border: "1px solid #e2e8f0",
-            borderRadius: "12px",
+            background: bg.card,
+            color: text.primary,
+            border: `1.5px solid ${border.strong}`,
+            borderRadius: "14px",
             fontSize: "15px",
             fontWeight: "600",
             cursor: "pointer",
+            transition: "all 0.2s ease",
           }}
         >
           <ArrowLeft size={16} />
           Go Back
-        </button>
+        </motion.button>
 
-        <Link
+        <motion.a
           href="/"
+          whileHover={{
+            scale: 1.04,
+            boxShadow: "0 8px 24px rgba(0,102,255,0.35)",
+          }}
+          whileTap={{ scale: 0.97 }}
           style={{
             display: "flex",
             alignItems: "center",
             gap: "8px",
             padding: "13px 28px",
-            background: "#2563eb",
+            background:
+              "linear-gradient(135deg, #0066FF, #6C3AED)",
             color: "white",
-            borderRadius: "12px",
+            borderRadius: "14px",
             fontSize: "15px",
-            fontWeight: "600",
+            fontWeight: "700",
             textDecoration: "none",
+            boxShadow: "0 4px 16px rgba(0,102,255,0.3)",
           }}
         >
           <Home size={16} />
           Go Home
-        </Link>
-      </div>
+        </motion.a>
+      </motion.div>
     </div>
   )
 }

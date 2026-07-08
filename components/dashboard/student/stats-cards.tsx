@@ -8,7 +8,9 @@ import {
   Calendar,
   TrendingUp,
   ArrowUp,
+  ArrowDown,
 } from "lucide-react"
+import { useDarkMode } from "@/hooks/use-dark-mode"
 
 interface Props {
   totalCourses: number
@@ -17,77 +19,60 @@ interface Props {
   gpa: number
 }
 
-const cards = (props: Props) => [
-  {
-    title: "Enrolled Courses",
-    value: String(props.totalCourses),
-    suffix: "",
-    desc: "Active this semester",
-    icon: BookOpen,
-    iconColor: "#0066FF",
-    iconBg: "linear-gradient(135deg, #EFF6FF, #DBEAFE)",
-    gradientFrom: "#EFF6FF",
-    gradientTo: "#DBEAFE",
-    accentColor: "#0066FF",
-    trend: "+2 new",
-    trendUp: true,
-  },
-  {
-    title: "Pending Tasks",
-    value: String(props.pendingAssignments),
-    suffix: "",
-    desc: "Assignments due",
-    icon: FileText,
-    iconColor: "#E11D48",
-    iconBg: "linear-gradient(135deg, #FFF1F2, #FFE4E6)",
-    gradientFrom: "#FFF1F2",
-    gradientTo: "#FFE4E6",
-    accentColor: "#E11D48",
-    trend: "Due soon",
-    trendUp: false,
-  },
-  {
-    title: "Attendance Rate",
-    value: String(props.attendancePercent),
-    suffix: "%",
-    desc: "This semester",
-    icon: Calendar,
-    iconColor: "#059669",
-    iconBg: "linear-gradient(135deg, #ECFDF5, #D1FAE5)",
-    gradientFrom: "#ECFDF5",
-    gradientTo: "#D1FAE5",
-    accentColor: "#059669",
-    trend: "+5% last month",
-    trendUp: true,
-  },
-  {
-    title: "Current GPA",
-    value: props.gpa.toFixed(1),
-    suffix: "",
-    desc: "Out of 4.0 scale",
-    icon: TrendingUp,
-    iconColor: "#7C3AED",
-    iconBg: "linear-gradient(135deg, #F5F3FF, #EDE9FE)",
-    gradientFrom: "#F5F3FF",
-    gradientTo: "#EDE9FE",
-    accentColor: "#7C3AED",
-    trend: "Top 15%",
-    trendUp: true,
-  },
-]
-
 export function StatsCards({
   totalCourses,
   pendingAssignments,
   attendancePercent,
   gpa,
 }: Props) {
-  const data = cards({
-    totalCourses,
-    pendingAssignments,
-    attendancePercent,
-    gpa,
-  })
+  const { isDark, bg, text, border, shadow } = useDarkMode()
+
+  const cards = [
+    {
+      title: "Enrolled Courses",
+      value: String(totalCourses),
+      suffix: "",
+      desc: "Active this semester",
+      icon: BookOpen,
+      gradient: "linear-gradient(135deg, #0066FF, #6C3AED)",
+      iconColor: "#0066FF",
+      trend: "+2 new",
+      trendUp: true,
+    },
+    {
+      title: "Pending Tasks",
+      value: String(pendingAssignments),
+      suffix: "",
+      desc: "Assignments due",
+      icon: FileText,
+      gradient: "linear-gradient(135deg, #E11D48, #F59E0B)",
+      iconColor: "#E11D48",
+      trend: "Due soon",
+      trendUp: false,
+    },
+    {
+      title: "Attendance Rate",
+      value: String(attendancePercent),
+      suffix: "%",
+      desc: "This semester",
+      icon: Calendar,
+      gradient: "linear-gradient(135deg, #059669, #0D9488)",
+      iconColor: "#059669",
+      trend: "+5% this month",
+      trendUp: true,
+    },
+    {
+      title: "Current GPA",
+      value: gpa.toFixed(1),
+      suffix: "",
+      desc: "Out of 4.0 scale",
+      icon: TrendingUp,
+      gradient: "linear-gradient(135deg, #7C3AED, #0066FF)",
+      iconColor: "#7C3AED",
+      trend: "Top 15%",
+      trendUp: true,
+    },
+  ]
 
   return (
     <div
@@ -98,7 +83,7 @@ export function StatsCards({
         marginBottom: "28px",
       }}
     >
-      {data.map((card, i) => {
+      {cards.map((card, i) => {
         const Icon = card.icon
         return (
           <motion.div
@@ -108,22 +93,23 @@ export function StatsCards({
             transition={{ delay: i * 0.1, duration: 0.5 }}
             whileHover={{
               y: -6,
-              boxShadow:
-                "0 20px 40px rgba(0,0,0,0.08)",
+              boxShadow: isDark
+                ? "0 20px 40px rgba(0,0,0,0.4)"
+                : "0 20px 40px rgba(0,0,0,0.08)",
             }}
             style={{
-              background: "white",
+              background: bg.card,
               borderRadius: "20px",
               padding: "24px",
-              border: "1px solid #F1F5F9",
-              boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
+              border: `1px solid ${border.default}`,
+              boxShadow: shadow.sm,
               cursor: "default",
               position: "relative",
               overflow: "hidden",
               transition: "all 0.3s ease",
             }}
           >
-            {/* Background Accent */}
+            {/* Background accent */}
             <div
               style={{
                 position: "absolute",
@@ -131,9 +117,10 @@ export function StatsCards({
                 right: 0,
                 width: "80px",
                 height: "80px",
-                background: card.gradientFrom,
+                background: isDark
+                  ? `${card.iconColor}15`
+                  : `${card.iconColor}10`,
                 borderRadius: "0 20px 0 80px",
-                opacity: 0.5,
               }}
             />
 
@@ -143,15 +130,16 @@ export function StatsCards({
                 width: "48px",
                 height: "48px",
                 borderRadius: "14px",
-                background: card.iconBg,
+                background: card.gradient,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
                 marginBottom: "16px",
                 position: "relative",
+                boxShadow: `0 6px 16px ${card.iconColor}35`,
               }}
             >
-              <Icon size={22} color={card.iconColor} />
+              <Icon size={22} color="white" />
             </div>
 
             {/* Value */}
@@ -159,7 +147,7 @@ export function StatsCards({
               style={{
                 fontSize: "36px",
                 fontWeight: "800",
-                color: "#0F172A",
+                color: text.primary,
                 lineHeight: 1,
                 marginBottom: "4px",
                 letterSpacing: "-0.02em",
@@ -169,7 +157,7 @@ export function StatsCards({
               <span
                 style={{
                   fontSize: "20px",
-                  color: card.accentColor,
+                  color: card.iconColor,
                 }}
               >
                 {card.suffix}
@@ -181,7 +169,7 @@ export function StatsCards({
               style={{
                 fontSize: "14px",
                 fontWeight: "600",
-                color: "#1E293B",
+                color: text.primary,
                 marginBottom: "4px",
               }}
             >
@@ -192,7 +180,7 @@ export function StatsCards({
             <div
               style={{
                 fontSize: "12px",
-                color: "#94A3B8",
+                color: text.muted,
                 marginBottom: "12px",
               }}
             >
@@ -208,23 +196,22 @@ export function StatsCards({
                 padding: "3px 10px",
                 borderRadius: "20px",
                 background: card.trendUp
-                  ? "#ECFDF5"
+                  ? isDark
+                    ? "rgba(5,150,105,0.15)"
+                    : "#ECFDF5"
+                  : isDark
+                  ? "rgba(225,29,72,0.15)"
                   : "#FFF1F2",
-                color: card.trendUp
-                  ? "#059669"
-                  : "#E11D48",
+                color: card.trendUp ? "#059669" : "#E11D48",
                 fontSize: "11px",
                 fontWeight: "600",
               }}
             >
-              <ArrowUp
-                size={10}
-                style={{
-                  transform: card.trendUp
-                    ? "none"
-                    : "rotate(180deg)",
-                }}
-              />
+              {card.trendUp ? (
+                <ArrowUp size={10} />
+              ) : (
+                <ArrowDown size={10} />
+              )}
               {card.trend}
             </div>
           </motion.div>

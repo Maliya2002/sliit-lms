@@ -18,6 +18,7 @@ import {
   AlertCircle,
   ArrowRight,
 } from "lucide-react"
+import { useDarkMode } from "@/hooks/use-dark-mode"
 
 const loginSchema = z.object({
   email: z
@@ -38,6 +39,8 @@ export function LoginForm() {
   const callbackUrl = searchParams.get("callbackUrl")
   const registered = searchParams.get("registered")
   const reset = searchParams.get("reset")
+
+  const { isDark } = useDarkMode()
 
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
@@ -106,23 +109,33 @@ export function LoginForm() {
     }
   }
 
-  const inputWrapperStyle = {
-    position: "relative" as const,
-    marginBottom: "20px",
-  }
+  // Dark mode colors
+  const inputBg = isDark ? "rgba(255,255,255,0.05)" : "#F8FAFC"
+  const inputBorder = isDark
+    ? "rgba(255,255,255,0.1)"
+    : "#E2E8F0"
+  const inputBorderFocus = "#0066FF"
+  const inputColor = isDark ? "#F1F5F9" : "#0F172A"
+  const labelColor = isDark ? "#94A3B8" : "#374151"
+  const iconColor = isDark
+    ? "rgba(255,255,255,0.4)"
+    : "#94A3B8"
+  const cardBg = isDark
+    ? "rgba(255,255,255,0.04)"
+    : "#F8FAFC"
+  const cardBorder = isDark
+    ? "rgba(255,255,255,0.08)"
+    : "#E2E8F0"
+  const linkColor = "#0066FF"
 
-  const inputStyle = (hasError: boolean, hasIcon: boolean) => ({
+  const inputStyle = (hasError: boolean) => ({
     width: "100%",
-    padding: `14px ${hasIcon ? "48px" : "16px"} 14px ${
-      hasIcon ? "44px" : "16px"
-    }`,
-    border: `2px solid ${
-      hasError ? "#E11D48" : "#E2E8F0"
-    }`,
+    padding: "14px 48px 14px 44px",
+    border: `2px solid ${hasError ? "#E11D48" : inputBorder}`,
     borderRadius: "14px",
     fontSize: "15px",
-    color: "#0F172A",
-    background: "#F8FAFC",
+    color: inputColor,
+    background: inputBg,
     outline: "none",
     boxSizing: "border-box" as const,
     transition: "all 0.2s ease",
@@ -133,7 +146,7 @@ export function LoginForm() {
     left: "16px",
     top: "50%",
     transform: "translateY(-50%)",
-    color: "#94A3B8",
+    color: iconColor,
     pointerEvents: "none" as const,
   }
 
@@ -147,10 +160,11 @@ export function LoginForm() {
             animate={{ opacity: 1, y: 0, height: "auto" }}
             exit={{ opacity: 0, y: -10, height: 0 }}
             style={{
-              background:
-                "linear-gradient(135deg, #ECFDF5, #D1FAE5)",
-              border: "1px solid #A7F3D0",
-              color: "#065F46",
+              background: isDark
+                ? "rgba(5,150,105,0.15)"
+                : "linear-gradient(135deg, #ECFDF5, #D1FAE5)",
+              border: `1px solid ${isDark ? "rgba(5,150,105,0.3)" : "#A7F3D0"}`,
+              color: "#059669",
               padding: "14px 16px",
               borderRadius: "14px",
               fontSize: "14px",
@@ -174,10 +188,11 @@ export function LoginForm() {
             animate={{ opacity: 1, y: 0, height: "auto" }}
             exit={{ opacity: 0, y: -10, height: 0 }}
             style={{
-              background:
-                "linear-gradient(135deg, #FFF1F2, #FFE4E6)",
-              border: "1px solid #FECDD3",
-              color: "#9F1239",
+              background: isDark
+                ? "rgba(225,29,72,0.15)"
+                : "linear-gradient(135deg, #FFF1F2, #FFE4E6)",
+              border: `1px solid ${isDark ? "rgba(225,29,72,0.3)" : "#FECDD3"}`,
+              color: isDark ? "#FB7185" : "#9F1239",
               padding: "14px 16px",
               borderRadius: "14px",
               fontSize: "14px",
@@ -200,10 +215,11 @@ export function LoginForm() {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             style={{
-              background:
-                "linear-gradient(135deg, #ECFDF5, #D1FAE5)",
-              border: "1px solid #A7F3D0",
-              color: "#065F46",
+              background: isDark
+                ? "rgba(5,150,105,0.15)"
+                : "linear-gradient(135deg, #ECFDF5, #D1FAE5)",
+              border: `1px solid ${isDark ? "rgba(5,150,105,0.3)" : "#A7F3D0"}`,
+              color: "#059669",
               padding: "14px 16px",
               borderRadius: "14px",
               fontSize: "14px",
@@ -217,20 +233,20 @@ export function LoginForm() {
               size={18}
               style={{ animation: "spin 1s linear infinite" }}
             />
-            Signing in... Redirecting to dashboard
+            Signing in... Redirecting
             <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
           </motion.div>
         )}
       </AnimatePresence>
 
       {/* Email */}
-      <div style={inputWrapperStyle}>
+      <div style={{ position: "relative", marginBottom: "20px" }}>
         <label
           style={{
             display: "block",
             fontSize: "13px",
             fontWeight: "600",
-            color: "#374151",
+            color: labelColor,
             marginBottom: "8px",
           }}
         >
@@ -243,18 +259,20 @@ export function LoginForm() {
             type="email"
             placeholder="you@sliit.lk"
             disabled={isLoading || success}
-            style={inputStyle(!!errors.email, true)}
+            style={inputStyle(!!errors.email)}
             onFocus={(e) => {
-              e.target.style.borderColor = "#0066FF"
-              e.target.style.background = "white"
+              e.target.style.borderColor = inputBorderFocus
+              e.target.style.background = isDark
+                ? "rgba(255,255,255,0.08)"
+                : "white"
               e.target.style.boxShadow =
                 "0 0 0 4px rgba(0,102,255,0.1)"
             }}
             onBlur={(e) => {
               e.target.style.borderColor = errors.email
                 ? "#E11D48"
-                : "#E2E8F0"
-              e.target.style.background = "#F8FAFC"
+                : inputBorder
+              e.target.style.background = inputBg
               e.target.style.boxShadow = "none"
             }}
           />
@@ -279,7 +297,7 @@ export function LoginForm() {
       </div>
 
       {/* Password */}
-      <div style={inputWrapperStyle}>
+      <div style={{ position: "relative", marginBottom: "20px" }}>
         <div
           style={{
             display: "flex",
@@ -292,7 +310,7 @@ export function LoginForm() {
             style={{
               fontSize: "13px",
               fontWeight: "600",
-              color: "#374151",
+              color: labelColor,
             }}
           >
             Password
@@ -302,7 +320,7 @@ export function LoginForm() {
             style={{
               fontSize: "12px",
               fontWeight: "600",
-              color: "#0066FF",
+              color: linkColor,
               textDecoration: "none",
             }}
           >
@@ -316,18 +334,20 @@ export function LoginForm() {
             type={showPassword ? "text" : "password"}
             placeholder="Enter your password"
             disabled={isLoading || success}
-            style={inputStyle(!!errors.password, true)}
+            style={inputStyle(!!errors.password)}
             onFocus={(e) => {
-              e.target.style.borderColor = "#0066FF"
-              e.target.style.background = "white"
+              e.target.style.borderColor = inputBorderFocus
+              e.target.style.background = isDark
+                ? "rgba(255,255,255,0.08)"
+                : "white"
               e.target.style.boxShadow =
                 "0 0 0 4px rgba(0,102,255,0.1)"
             }}
             onBlur={(e) => {
               e.target.style.borderColor = errors.password
                 ? "#E11D48"
-                : "#E2E8F0"
-              e.target.style.background = "#F8FAFC"
+                : inputBorder
+              e.target.style.background = inputBg
               e.target.style.boxShadow = "none"
             }}
           />
@@ -342,7 +362,7 @@ export function LoginForm() {
               background: "none",
               border: "none",
               cursor: "pointer",
-              color: "#94A3B8",
+              color: iconColor,
               padding: "4px",
               display: "flex",
             }}
@@ -449,14 +469,15 @@ export function LoginForm() {
           style={{
             flex: 1,
             height: "1px",
-            background:
-              "linear-gradient(90deg, transparent, #E2E8F0, transparent)",
+            background: isDark
+              ? "rgba(255,255,255,0.08)"
+              : "linear-gradient(90deg, transparent, #E2E8F0, transparent)",
           }}
         />
         <span
           style={{
             fontSize: "12px",
-            color: "#94A3B8",
+            color: isDark ? "#475569" : "#94A3B8",
             fontWeight: "500",
           }}
         >
@@ -466,8 +487,9 @@ export function LoginForm() {
           style={{
             flex: 1,
             height: "1px",
-            background:
-              "linear-gradient(90deg, transparent, #E2E8F0, transparent)",
+            background: isDark
+              ? "rgba(255,255,255,0.08)"
+              : "linear-gradient(90deg, transparent, #E2E8F0, transparent)",
           }}
         />
       </div>
@@ -484,9 +506,15 @@ export function LoginForm() {
           gap: "8px",
           width: "100%",
           padding: "14px",
-          background: "white",
-          color: "#0F172A",
-          border: "2px solid #E2E8F0",
+          background: isDark
+            ? "rgba(255,255,255,0.05)"
+            : "white",
+          color: isDark ? "#F1F5F9" : "#0F172A",
+          border: `2px solid ${
+            isDark
+              ? "rgba(255,255,255,0.1)"
+              : "#E2E8F0"
+          }`,
           borderRadius: "14px",
           fontSize: "15px",
           fontWeight: "600",
@@ -499,84 +527,105 @@ export function LoginForm() {
         Create an Account
         <ArrowRight size={16} color="#6C3AED" />
       </motion.a>
-{/* Demo Credentials */}
-<div
-  style={{
-    background: "#F8FAFC",
-    border: "1px solid #E2E8F0",
-    borderRadius: "14px",
-    padding: "14px 16px",
-  }}
->
-  <p
-    style={{
-      fontSize: "12px",
-      fontWeight: "700",
-      color: "#0F172A",
-      marginBottom: "10px",
-      display: "flex",
-      alignItems: "center",
-      gap: "6px",
-    }}
-  >
-    🧪 Demo Credentials
-  </p>
-  {[
-    {
-      role: "Admin",
-      email: "admin@sliit.lk",
-      pass: "Admin@123",
-      color: "#E11D48",
-    },
-    {
-      role: "Lecturer",
-      email: "silva@sliit.lk",
-      pass: "Lecturer@123",
-      color: "#F59E0B",
-    },
-    {
-      role: "Student",
-      email: "student@sliit.lk",
-      pass: "Student@123",
-      color: "#0066FF",
-    },
-  ].map((cred) => (
-    <div
-      key={cred.role}
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: "6px",
-        fontSize: "11px",
-        color: "#64748B",
-        marginBottom: "6px",
-        flexWrap: "wrap",
-      }}
-    >
-      <span
+
+      {/* Demo Credentials */}
+      <div
         style={{
-          fontSize: "10px",
-          fontWeight: "700",
-          color: cred.color,
-          background: `${cred.color}15`,
-          padding: "2px 8px",
-          borderRadius: "6px",
-          minWidth: "55px",
-          textAlign: "center",
+          background: cardBg,
+          border: `1px solid ${cardBorder}`,
+          borderRadius: "14px",
+          padding: "16px 20px",
         }}
       >
-        {cred.role}
-      </span>
-      <span style={{ color: "#475569", fontSize: "11px" }}>
-        {cred.email}
-      </span>
-      <span style={{ color: "#CBD5E1" }}>/</span>
-      <span style={{ color: "#475569", fontSize: "11px" }}>
-        {cred.pass}
-      </span>
-    </div>
-  ))}
-</div>
+        <p
+          style={{
+            fontSize: "12px",
+            fontWeight: "700",
+            color: isDark ? "#E2E8F0" : "#0F172A",
+            marginBottom: "12px",
+            display: "flex",
+            alignItems: "center",
+            gap: "6px",
+          }}
+        >
+          🧪 Demo Credentials
+        </p>
+        {[
+          {
+            role: "Admin",
+            email: "admin@sliit.lk",
+            pass: "Admin@123",
+            color: "#E11D48",
+          },
+          {
+            role: "Lecturer",
+            email: "silva@sliit.lk",
+            pass: "Lecturer@123",
+            color: "#F59E0B",
+          },
+          {
+            role: "Student",
+            email: "student@sliit.lk",
+            pass: "Student@123",
+            color: "#0066FF",
+          },
+        ].map((cred) => (
+          <div
+            key={cred.role}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "6px",
+              fontSize: "11px",
+              color: isDark ? "#94A3B8" : "#64748B",
+              marginBottom: "6px",
+              flexWrap: "wrap",
+            }}
+          >
+            <span
+              style={{
+                fontSize: "10px",
+                fontWeight: "700",
+                color: cred.color,
+                background: isDark
+                  ? `${cred.color}20`
+                  : `${cred.color}15`,
+                padding: "2px 8px",
+                borderRadius: "6px",
+                minWidth: "55px",
+                textAlign: "center",
+              }}
+            >
+              {cred.role}
+            </span>
+            <span
+              style={{
+                color: isDark ? "#CBD5E1" : "#475569",
+                fontSize: "11px",
+              }}
+            >
+              {cred.email}
+            </span>
+            <span
+              style={{
+                color: isDark
+                  ? "rgba(255,255,255,0.2)"
+                  : "#CBD5E1",
+              }}
+            >
+              /
+            </span>
+            <span
+              style={{
+                color: isDark ? "#CBD5E1" : "#475569",
+                fontSize: "11px",
+              }}
+            >
+              {cred.pass}
+            </span>
+          </div>
+        ))}
+      </div>
     </form>
   )
 }

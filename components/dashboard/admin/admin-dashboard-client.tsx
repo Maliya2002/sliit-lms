@@ -2,6 +2,7 @@
 "use client"
 
 import { motion } from "framer-motion"
+import { useDarkMode } from "@/hooks/use-dark-mode"
 import { AdminStats } from "./admin-stats"
 import { RecentUsers } from "./recent-users"
 import { QuickActions } from "./quick-actions"
@@ -16,15 +17,17 @@ interface Props {
 }
 
 export function AdminDashboardClient({ stats }: Props) {
+  const { bg } = useDarkMode()
+
   return (
     <div
       style={{
         padding: "28px 32px",
-        background: "#F8FAFC",
+        background: bg.primary,
         minHeight: "calc(100vh - 76px)",
+        transition: "background 0.3s ease",
       }}
     >
-      {/* Stats Cards */}
       <AdminStats
         totalStudents={stats.totalStudents}
         totalCourses={stats.totalCourses}
@@ -32,7 +35,6 @@ export function AdminDashboardClient({ stats }: Props) {
         systemHealth={stats.systemHealth}
       />
 
-      {/* Main Content Grid */}
       <div
         style={{
           display: "grid",
@@ -40,7 +42,6 @@ export function AdminDashboardClient({ stats }: Props) {
           gap: "24px",
         }}
       >
-        {/* Recent Users */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -48,8 +49,6 @@ export function AdminDashboardClient({ stats }: Props) {
         >
           <RecentUsers />
         </motion.div>
-
-        {/* Quick Actions */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}

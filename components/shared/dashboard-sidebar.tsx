@@ -3,6 +3,7 @@
 
 import { useState, useEffect } from "react"
 import { usePathname } from "next/navigation"
+import { useTheme } from "next-themes"
 import { signOut } from "next-auth/react"
 import { motion, AnimatePresence } from "framer-motion"
 import {
@@ -23,11 +24,12 @@ interface Props {
 
 export function DashboardSidebar({ config, user }: Props) {
   const pathname = usePathname()
+  const { theme } = useTheme()
+  const isDark = theme === "dark"
   const [collapsed, setCollapsed] = useState(false)
   const [hoveredItem, setHoveredItem] = useState<string | null>(null)
-  const { theme, navigation } = config
+  const { navigation } = config
 
-  // Auto collapse on tablet
   useEffect(() => {
     const check = () => {
       const width = window.innerWidth
@@ -49,6 +51,20 @@ export function DashboardSidebar({ config, user }: Props) {
       ? BookOpen
       : GraduationCap
 
+  const sidebarBg = isDark
+    ? "rgba(10,14,26,0.95)"
+    : config.theme.sidebarBg
+
+  const borderColor = isDark
+    ? "rgba(255,255,255,0.04)"
+    : "rgba(255,255,255,0.06)"
+
+  const groupLabelColor = isDark ? "#2D3748" : "#374151"
+
+  const navItemHoverBg = isDark
+    ? "rgba(255,255,255,0.06)"
+    : "rgba(255,255,255,0.05)"
+
   const initials = `${user.firstName[0]}${user.lastName[0]}`
 
   return (
@@ -57,21 +73,21 @@ export function DashboardSidebar({ config, user }: Props) {
       transition={{ duration: 0.3, ease: "easeInOut" }}
       style={{
         minHeight: "100vh",
-        background: theme.sidebarBg,
+        background: sidebarBg,
         display: "flex",
         flexDirection: "column",
         position: "sticky",
         top: 0,
         flexShrink: 0,
-        borderRight: "1px solid rgba(255,255,255,0.06)",
+        borderRight: `1px solid ${borderColor}`,
         overflow: "hidden",
       }}
     >
-      {/* ── Logo Section ── */}
+      {/* Logo */}
       <div
         style={{
           padding: "20px 14px",
-          borderBottom: "1px solid rgba(255,255,255,0.06)",
+          borderBottom: `1px solid ${borderColor}`,
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
@@ -86,25 +102,23 @@ export function DashboardSidebar({ config, user }: Props) {
             overflow: "hidden",
           }}
         >
-          {/* Logo Icon */}
           <motion.div
             whileHover={{ scale: 1.05, rotate: 5 }}
             style={{
               width: "38px",
               height: "38px",
-              background: `linear-gradient(135deg, ${theme.primary}, ${theme.primaryDark})`,
+              background: `linear-gradient(135deg, ${config.theme.primary}, ${config.theme.primaryDark})`,
               borderRadius: "12px",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
               flexShrink: 0,
-              boxShadow: `0 4px 14px ${theme.primary}40`,
+              boxShadow: `0 4px 14px ${config.theme.primary}40`,
             }}
           >
             <LogoIcon size={20} color="white" />
           </motion.div>
 
-          {/* Logo Text */}
           <AnimatePresence>
             {!collapsed && (
               <motion.div
@@ -126,7 +140,7 @@ export function DashboardSidebar({ config, user }: Props) {
                   <span
                     style={{
                       fontWeight: "300",
-                      color: theme.roleLabelColor,
+                      color: config.theme.roleLabelColor,
                     }}
                   >
                     LMS
@@ -134,7 +148,7 @@ export function DashboardSidebar({ config, user }: Props) {
                 </div>
                 <div
                   style={{
-                    color: theme.roleLabelColor,
+                    color: config.theme.roleLabelColor,
                     fontSize: "10px",
                     marginTop: "2px",
                     fontWeight: "600",
@@ -142,14 +156,13 @@ export function DashboardSidebar({ config, user }: Props) {
                     textTransform: "uppercase",
                   }}
                 >
-                  {theme.roleLabel}
+                  {config.theme.roleLabel}
                 </div>
               </motion.div>
             )}
           </AnimatePresence>
         </div>
 
-        {/* Collapse Button */}
         <motion.button
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
@@ -166,7 +179,6 @@ export function DashboardSidebar({ config, user }: Props) {
             cursor: "pointer",
             color: "#64748B",
             flexShrink: 0,
-            transition: "all 0.2s ease",
           }}
         >
           {collapsed ? (
@@ -177,7 +189,7 @@ export function DashboardSidebar({ config, user }: Props) {
         </motion.button>
       </div>
 
-      {/* ── Navigation ── */}
+      {/* Navigation */}
       <nav
         style={{
           flex: 1,
@@ -188,7 +200,6 @@ export function DashboardSidebar({ config, user }: Props) {
       >
         {navigation.map((group) => (
           <div key={group.label} style={{ marginBottom: "6px" }}>
-            {/* Group Label */}
             <AnimatePresence>
               {!collapsed && (
                 <motion.div
@@ -196,7 +207,7 @@ export function DashboardSidebar({ config, user }: Props) {
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                   style={{
-                    color: "#374151",
+                    color: groupLabelColor,
                     fontSize: "10px",
                     fontWeight: "700",
                     letterSpacing: "0.1em",
@@ -209,7 +220,6 @@ export function DashboardSidebar({ config, user }: Props) {
               )}
             </AnimatePresence>
 
-            {/* Nav Items */}
             {group.items.map((item) => {
               const Icon = getIcon(item.icon)
               const isActive = pathname === item.href
@@ -221,38 +231,31 @@ export function DashboardSidebar({ config, user }: Props) {
                   href={item.href}
                   title={collapsed ? item.label : undefined}
                   whileTap={{ scale: 0.97 }}
-                  onMouseEnter={() =>
-                    setHoveredItem(item.href)
-                  }
+                  onMouseEnter={() => setHoveredItem(item.href)}
                   onMouseLeave={() => setHoveredItem(null)}
                   style={{
                     display: "flex",
                     alignItems: "center",
                     gap: "10px",
-                    padding: collapsed
-                      ? "10px"
-                      : "10px 12px",
+                    padding: collapsed ? "10px" : "10px 12px",
                     borderRadius: "12px",
                     marginBottom: "2px",
                     textDecoration: "none",
                     position: "relative",
                     transition: "all 0.15s ease",
-                    justifyContent: collapsed
-                      ? "center"
-                      : "flex-start",
+                    justifyContent: collapsed ? "center" : "flex-start",
                     background: isActive
-                      ? `${theme.primary}20`
+                      ? `${config.theme.primary}20`
                       : isHovered
-                      ? "rgba(255,255,255,0.05)"
+                      ? navItemHoverBg
                       : "transparent",
                     color: isActive
-                      ? theme.roleLabelColor
+                      ? config.theme.roleLabelColor
                       : isHovered
                       ? "rgba(255,255,255,0.9)"
                       : "#6B7280",
                   }}
                 >
-                  {/* Active indicator */}
                   {isActive && (
                     <motion.div
                       layoutId="activeIndicator"
@@ -263,9 +266,9 @@ export function DashboardSidebar({ config, user }: Props) {
                         transform: "translateY(-50%)",
                         width: "3px",
                         height: "20px",
-                        background: `linear-gradient(180deg, ${theme.primary}, ${theme.primaryDark})`,
+                        background: `linear-gradient(180deg, ${config.theme.primary}, ${config.theme.primaryDark})`,
                         borderRadius: "0 4px 4px 0",
-                        boxShadow: `0 0 8px ${theme.primary}60`,
+                        boxShadow: `0 0 8px ${config.theme.primary}60`,
                       }}
                       transition={{
                         type: "spring",
@@ -275,7 +278,6 @@ export function DashboardSidebar({ config, user }: Props) {
                     />
                   )}
 
-                  {/* Icon */}
                   <div
                     style={{
                       width: "34px",
@@ -286,18 +288,13 @@ export function DashboardSidebar({ config, user }: Props) {
                       justifyContent: "center",
                       flexShrink: 0,
                       background: isActive
-                        ? `${theme.primary}25`
+                        ? `${config.theme.primary}25`
                         : "transparent",
-                      transition: "all 0.15s ease",
                     }}
                   >
-                    <Icon
-                      size={17}
-                      style={{ flexShrink: 0 }}
-                    />
+                    <Icon size={17} style={{ flexShrink: 0 }} />
                   </div>
 
-                  {/* Label */}
                   <AnimatePresence>
                     {!collapsed && (
                       <motion.span
@@ -324,14 +321,13 @@ export function DashboardSidebar({ config, user }: Props) {
         ))}
       </nav>
 
-      {/* ── User Profile Section ── */}
+      {/* User Section */}
       <div
         style={{
           padding: "12px 10px",
-          borderTop: "1px solid rgba(255,255,255,0.06)",
+          borderTop: `1px solid ${borderColor}`,
         }}
       >
-        {/* User Card */}
         <AnimatePresence>
           {!collapsed && (
             <motion.div
@@ -349,13 +345,12 @@ export function DashboardSidebar({ config, user }: Props) {
                 marginBottom: "8px",
               }}
             >
-              {/* Avatar */}
               <div
                 style={{
                   width: "36px",
                   height: "36px",
                   borderRadius: "12px",
-                  background: theme.avatarGradient,
+                  background: config.theme.avatarGradient,
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
@@ -363,13 +358,10 @@ export function DashboardSidebar({ config, user }: Props) {
                   fontWeight: "800",
                   fontSize: "13px",
                   flexShrink: 0,
-                  boxShadow: `0 4px 10px ${theme.primary}30`,
                 }}
               >
                 {initials}
               </div>
-
-              {/* User Info */}
               <div style={{ overflow: "hidden", flex: 1 }}>
                 <div
                   style={{
@@ -385,11 +377,10 @@ export function DashboardSidebar({ config, user }: Props) {
                 </div>
                 <div
                   style={{
-                    color: theme.roleLabelColor,
+                    color: config.theme.roleLabelColor,
                     fontSize: "10px",
                     fontWeight: "600",
                     textTransform: "uppercase",
-                    letterSpacing: "0.06em",
                   }}
                 >
                   {config.role}
@@ -399,7 +390,6 @@ export function DashboardSidebar({ config, user }: Props) {
           )}
         </AnimatePresence>
 
-        {/* Collapsed Avatar */}
         {collapsed && (
           <div
             style={{
@@ -413,14 +403,13 @@ export function DashboardSidebar({ config, user }: Props) {
                 width: "38px",
                 height: "38px",
                 borderRadius: "12px",
-                background: theme.avatarGradient,
+                background: config.theme.avatarGradient,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
                 color: "white",
                 fontWeight: "800",
                 fontSize: "13px",
-                boxShadow: `0 4px 10px ${theme.primary}30`,
               }}
             >
               {initials}
@@ -428,7 +417,6 @@ export function DashboardSidebar({ config, user }: Props) {
           </div>
         )}
 
-        {/* Sign Out Button */}
         <motion.button
           whileHover={{
             backgroundColor: "rgba(239,68,68,0.1)",
@@ -450,7 +438,6 @@ export function DashboardSidebar({ config, user }: Props) {
             fontWeight: "600",
             cursor: "pointer",
             justifyContent: collapsed ? "center" : "flex-start",
-            transition: "all 0.2s ease",
           }}
         >
           <div

@@ -3,6 +3,7 @@
 
 import { motion } from "framer-motion"
 import { GraduationCap, Sparkles } from "lucide-react"
+import { useDarkMode } from "@/hooks/use-dark-mode"
 
 interface AuthWrapperProps {
   children: React.ReactNode
@@ -15,12 +16,15 @@ export function AuthWrapper({
   title,
   subtitle,
 }: AuthWrapperProps) {
+  const { isDark } = useDarkMode()
+
   return (
     <div
       style={{
         minHeight: "100vh",
         display: "flex",
-        background: "#F8FAFC",
+        background: isDark ? "#0B0F1A" : "#F8FAFC",
+        transition: "background 0.3s ease",
       }}
     >
       {/* ── LEFT SIDE — Premium Branding ── */}
@@ -339,6 +343,7 @@ export function AuthWrapper({
           </motion.div>
         </div>
       </div>
+
       {/* ── RIGHT SIDE — Form ── */}
       <motion.div
         initial={{ opacity: 0, x: 50 }}
@@ -351,9 +356,10 @@ export function AuthWrapper({
           alignItems: "center",
           justifyContent: "center",
           padding: "40px 24px",
-          background: "white",
+          background: isDark ? "#111827" : "white",
           minHeight: "100vh",
           overflowY: "auto",
+          transition: "background 0.3s ease",
         }}
       >
         <div
@@ -392,7 +398,7 @@ export function AuthWrapper({
                 style={{
                   fontSize: "18px",
                   fontWeight: "800",
-                  color: "#0F172A",
+                  color: isDark ? "#F1F5F9" : "#0F172A",
                 }}
               >
                 SLIIT
@@ -421,7 +427,7 @@ export function AuthWrapper({
               style={{
                 fontSize: "clamp(22px, 5vw, 28px)",
                 fontWeight: "800",
-                color: "#0F172A",
+                color: isDark ? "#F1F5F9" : "#0F172A",
                 letterSpacing: "-0.02em",
                 marginBottom: "8px",
               }}
@@ -431,7 +437,7 @@ export function AuthWrapper({
             <p
               style={{
                 fontSize: "14px",
-                color: "#64748B",
+                color: isDark ? "#64748B" : "#64748B",
                 lineHeight: 1.6,
               }}
             >
