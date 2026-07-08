@@ -1,5 +1,7 @@
+// components/dashboard/lecturer/lecturer-dashboard-client.tsx
 "use client"
 
+import { motion } from "framer-motion"
 import { LecturerStats } from "./lecturer-stats"
 import { TeachingCourses } from "./teaching-courses"
 import { RecentSubmissions } from "./recent-submissions"
@@ -16,8 +18,13 @@ interface Props {
 
 export function LecturerDashboardClient({ stats }: Props) {
   return (
-    <div style={{ padding: "28px" }}>
-
+    <div
+      style={{
+        padding: "28px 32px",
+        background: "#F8FAFC",
+        minHeight: "calc(100vh - 76px)",
+      }}
+    >
       {/* Stats */}
       <LecturerStats
         totalCourses={stats.totalCourses}
@@ -31,19 +38,27 @@ export function LecturerDashboardClient({ stats }: Props) {
         style={{
           display: "grid",
           gridTemplateColumns: "1.4fr 1fr",
-          gap: "20px",
+          gap: "24px",
         }}
       >
         {/* Left */}
-        <div>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4, duration: 0.5 }}
+        >
           <TeachingCourses />
-        </div>
+        </motion.div>
 
         {/* Right */}
-        <div>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5, duration: 0.5 }}
+        >
           <RecentSubmissions />
           <LecturerQuickActions />
-        </div>
+        </motion.div>
       </div>
     </div>
   )

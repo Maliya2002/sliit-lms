@@ -1,5 +1,7 @@
+// components/dashboard/lecturer/lecturer-quick-actions.tsx
 "use client"
 
+import { motion } from "framer-motion"
 import {
   FilePlus,
   ClipboardPlus,
@@ -8,60 +10,69 @@ import {
   BarChart3,
   Users,
 } from "lucide-react"
+import { useRouter } from "next/navigation"
 
 const ACTIONS = [
   {
     label: "New Assignment",
-    desc: "Create assignment",
-    icon: <FilePlus size={20} color="#d97706" />,
-    bg: "#fffbeb",
-    href: "/lecturer/assignments/new",
+    icon: FilePlus,
+    color: "#F59E0B",
+    bg: "linear-gradient(135deg, #FFFBEB, #FEF3C7)",
+    gradient: "linear-gradient(135deg, #F59E0B, #EF4444)",
+    href: "/lecturer/assignments",
   },
   {
     label: "New Quiz",
-    desc: "Create a quiz",
-    icon: <ClipboardPlus size={20} color="#2563eb" />,
-    bg: "#eff6ff",
-    href: "/lecturer/quizzes/new",
+    icon: ClipboardPlus,
+    color: "#0066FF",
+    bg: "linear-gradient(135deg, #EFF6FF, #DBEAFE)",
+    gradient: "linear-gradient(135deg, #0066FF, #6C3AED)",
+    href: "/lecturer/quizzes",
   },
   {
     label: "Live Class",
-    desc: "Start session",
-    icon: <Video size={20} color="#dc2626" />,
-    bg: "#fef2f2",
+    icon: Video,
+    color: "#E11D48",
+    bg: "linear-gradient(135deg, #FFF1F2, #FFE4E6)",
+    gradient: "linear-gradient(135deg, #E11D48, #F59E0B)",
     href: "/lecturer/live",
   },
   {
     label: "Announce",
-    desc: "Post announcement",
-    icon: <Bell size={20} color="#7c3aed" />,
-    bg: "#f5f3ff",
+    icon: Bell,
+    color: "#7C3AED",
+    bg: "linear-gradient(135deg, #F5F3FF, #EDE9FE)",
+    gradient: "linear-gradient(135deg, #7C3AED, #EC4899)",
     href: "/lecturer/announcements",
   },
   {
-    label: "View Reports",
-    desc: "Student analytics",
-    icon: <BarChart3 size={20} color="#059669" />,
-    bg: "#ecfdf5",
+    label: "Analytics",
+    icon: BarChart3,
+    color: "#059669",
+    bg: "linear-gradient(135deg, #ECFDF5, #D1FAE5)",
+    gradient: "linear-gradient(135deg, #059669, #0D9488)",
     href: "/lecturer/analytics",
   },
   {
-    label: "My Students",
-    desc: "View all students",
-    icon: <Users size={20} color="#64748b" />,
-    bg: "#f8fafc",
+    label: "Students",
+    icon: Users,
+    color: "#0891B2",
+    bg: "linear-gradient(135deg, #ECFEFF, #CFFAFE)",
+    gradient: "linear-gradient(135deg, #0891B2, #0D9488)",
     href: "/lecturer/students",
   },
 ]
 
 export function LecturerQuickActions() {
+  const router = useRouter()
+
   return (
     <div
       style={{
         background: "white",
-        borderRadius: "16px",
-        border: "1px solid #f1f5f9",
-        boxShadow: "0 1px 4px rgba(0,0,0,0.04)",
+        borderRadius: "24px",
+        border: "1px solid #F1F5F9",
+        boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
         overflow: "hidden",
         marginTop: "20px",
       }}
@@ -70,14 +81,14 @@ export function LecturerQuickActions() {
       <div
         style={{
           padding: "20px 24px",
-          borderBottom: "1px solid #f1f5f9",
+          borderBottom: "1px solid #F8FAFC",
         }}
       >
         <h3
           style={{
-            fontSize: "15px",
+            fontSize: "16px",
             fontWeight: "700",
-            color: "#1e293b",
+            color: "#0F172A",
             margin: 0,
           }}
         >
@@ -86,8 +97,8 @@ export function LecturerQuickActions() {
         <p
           style={{
             fontSize: "12px",
-            color: "#94a3b8",
-            margin: "2px 0 0",
+            color: "#94A3B8",
+            margin: "4px 0 0",
           }}
         >
           Common teaching tasks
@@ -103,57 +114,65 @@ export function LecturerQuickActions() {
           gap: "10px",
         }}
       >
-        {ACTIONS.map((action) => (
-          <a
-            key={action.label}
-            href={action.href}
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              gap: "8px",
-              padding: "16px 8px",
-              borderRadius: "12px",
-              border: "1px solid #f1f5f9",
-              textDecoration: "none",
-              textAlign: "center",
-              transition: "all 0.2s",
-            }}
-          >
-            <div
+        {ACTIONS.map((action, index) => {
+          const Icon = action.icon
+          return (
+            <motion.button
+              key={action.label}
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{
+                delay: index * 0.06,
+                duration: 0.3,
+              }}
+              whileHover={{
+                scale: 1.06,
+                boxShadow: `0 8px 20px ${action.color}25`,
+              }}
+              whileTap={{ scale: 0.96 }}
+              onClick={() => router.push(action.href)}
               style={{
-                width: "40px",
-                height: "40px",
-                borderRadius: "10px",
-                background: action.bg,
                 display: "flex",
+                flexDirection: "column",
                 alignItems: "center",
-                justifyContent: "center",
+                gap: "8px",
+                padding: "16px 8px",
+                borderRadius: "16px",
+                border: "1px solid #F1F5F9",
+                background: "white",
+                cursor: "pointer",
+                transition: "all 0.2s ease",
               }}
             >
-              {action.icon}
-            </div>
-            <div>
+              {/* Icon */}
               <div
                 style={{
-                  fontSize: "12px",
-                  fontWeight: "600",
-                  color: "#1e293b",
+                  width: "44px",
+                  height: "44px",
+                  borderRadius: "14px",
+                  background: action.gradient,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  boxShadow: `0 6px 16px ${action.color}30`,
+                }}
+              >
+                <Icon size={20} color="white" />
+              </div>
+
+              <span
+                style={{
+                  fontSize: "11px",
+                  fontWeight: "700",
+                  color: "#0F172A",
+                  textAlign: "center",
                 }}
               >
                 {action.label}
-              </div>
-              <div
-                style={{
-                  fontSize: "10px",
-                  color: "#94a3b8",
-                }}
-              >
-                {action.desc}
-              </div>
-            </div>
-          </a>
-        ))}
+              </span>
+            </motion.button>
+          )
+        })}
       </div>
     </div>
   )

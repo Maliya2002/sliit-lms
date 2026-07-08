@@ -1,6 +1,15 @@
+// components/dashboard/lecturer/teaching-courses.tsx
 "use client"
 
-import { BookOpen, ChevronRight, Users } from "lucide-react"
+import { motion } from "framer-motion"
+import {
+  BookOpen,
+  ChevronRight,
+  Users,
+  Clock,
+  TrendingUp,
+} from "lucide-react"
+import { useRouter } from "next/navigation"
 
 const DEMO_COURSES = [
   {
@@ -9,8 +18,11 @@ const DEMO_COURSES = [
     code: "SE3040",
     students: 45,
     progress: 60,
-    color: "#2563eb",
+    gradient: "linear-gradient(135deg, #0066FF, #6C3AED)",
+    color: "#0066FF",
     nextClass: "Today 2:00 PM",
+    submissions: 12,
+    trend: "+5%",
   },
   {
     id: "2",
@@ -18,8 +30,11 @@ const DEMO_COURSES = [
     code: "IT3030",
     students: 38,
     progress: 45,
-    color: "#7c3aed",
-    nextClass: "Tomorrow 10:00 AM",
+    gradient: "linear-gradient(135deg, #7C3AED, #EC4899)",
+    color: "#7C3AED",
+    nextClass: "Tomorrow 10AM",
+    submissions: 8,
+    trend: "+12%",
   },
   {
     id: "3",
@@ -27,8 +42,11 @@ const DEMO_COURSES = [
     code: "IT3050",
     students: 52,
     progress: 75,
+    gradient: "linear-gradient(135deg, #059669, #0D9488)",
     color: "#059669",
-    nextClass: "Dec 20, 1:00 PM",
+    nextClass: "Dec 20, 1PM",
+    submissions: 20,
+    trend: "+8%",
   },
   {
     id: "4",
@@ -36,19 +54,24 @@ const DEMO_COURSES = [
     code: "IT3020",
     students: 41,
     progress: 30,
-    color: "#d97706",
-    nextClass: "Dec 21, 9:00 AM",
+    gradient: "linear-gradient(135deg, #F59E0B, #EF4444)",
+    color: "#F59E0B",
+    nextClass: "Dec 21, 9AM",
+    submissions: 5,
+    trend: "+3%",
   },
 ]
 
 export function TeachingCourses() {
+  const router = useRouter()
+
   return (
     <div
       style={{
         background: "white",
-        borderRadius: "16px",
-        border: "1px solid #f1f5f9",
-        boxShadow: "0 1px 4px rgba(0,0,0,0.04)",
+        borderRadius: "24px",
+        border: "1px solid #F1F5F9",
+        boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
         overflow: "hidden",
       }}
     >
@@ -56,7 +79,7 @@ export function TeachingCourses() {
       <div
         style={{
           padding: "20px 24px",
-          borderBottom: "1px solid #f1f5f9",
+          borderBottom: "1px solid #F8FAFC",
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
@@ -66,28 +89,29 @@ export function TeachingCourses() {
           style={{
             display: "flex",
             alignItems: "center",
-            gap: "10px",
+            gap: "12px",
           }}
         >
           <div
             style={{
-              width: "36px",
-              height: "36px",
-              background: "#fffbeb",
-              borderRadius: "10px",
+              width: "38px",
+              height: "38px",
+              borderRadius: "12px",
+              background:
+                "linear-gradient(135deg, #FFFBEB, #FEF3C7)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
             }}
           >
-            <BookOpen size={18} color="#d97706" />
+            <BookOpen size={18} color="#F59E0B" />
           </div>
           <div>
             <h3
               style={{
-                fontSize: "15px",
+                fontSize: "16px",
                 fontWeight: "700",
-                color: "#1e293b",
+                color: "#0F172A",
                 margin: 0,
               }}
             >
@@ -96,7 +120,7 @@ export function TeachingCourses() {
             <p
               style={{
                 fontSize: "12px",
-                color: "#94a3b8",
+                color: "#94A3B8",
                 margin: 0,
               }}
             >
@@ -104,60 +128,79 @@ export function TeachingCourses() {
             </p>
           </div>
         </div>
-        <a
-          href="/lecturer/courses"
+
+        <motion.button
+          whileHover={{ scale: 1.05, x: 2 }}
+          onClick={() => router.push("/lecturer/courses")}
           style={{
-            fontSize: "13px",
-            color: "#d97706",
-            textDecoration: "none",
-            fontWeight: "600",
             display: "flex",
             alignItems: "center",
-            gap: "4px",
+            gap: "6px",
+            padding: "8px 16px",
+            background:
+              "linear-gradient(135deg, #FFFBEB, #FEF3C7)",
+            color: "#F59E0B",
+            border: "none",
+            borderRadius: "10px",
+            fontSize: "13px",
+            fontWeight: "600",
+            cursor: "pointer",
           }}
         >
           View all
           <ChevronRight size={14} />
-        </a>
+        </motion.button>
       </div>
 
-      {/* Courses */}
+      {/* Course List */}
       <div style={{ padding: "12px" }}>
-        {DEMO_COURSES.map((course) => (
-          <a
+        {DEMO_COURSES.map((course, index) => (
+          <motion.div
             key={course.id}
-            href={`/lecturer/courses/${course.id}`}
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{
+              delay: index * 0.08,
+              duration: 0.4,
+            }}
+            whileHover={{
+              backgroundColor: "#FAFBFF",
+              x: 4,
+            }}
+            onClick={() =>
+              router.push(`/lecturer/courses/${course.id}`)
+            }
             style={{
               display: "flex",
               alignItems: "center",
               gap: "14px",
               padding: "14px 12px",
-              borderRadius: "12px",
-              textDecoration: "none",
-              marginBottom: "4px",
-              border: "1px solid transparent",
-              transition: "all 0.15s",
+              borderRadius: "16px",
+              cursor: "pointer",
+              transition: "all 0.2s ease",
+              marginBottom:
+                index < DEMO_COURSES.length - 1 ? "4px" : 0,
             }}
           >
-            {/* Color Box */}
+            {/* Course Avatar */}
             <div
               style={{
-                width: "46px",
-                height: "46px",
-                borderRadius: "12px",
-                background: `${course.color}15`,
+                width: "50px",
+                height: "50px",
+                borderRadius: "14px",
+                background: course.gradient,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
                 flexShrink: 0,
-                border: `1px solid ${course.color}20`,
+                boxShadow: `0 4px 14px ${course.color}35`,
               }}
             >
               <span
                 style={{
-                  fontSize: "11px",
+                  fontSize: "12px",
                   fontWeight: "800",
-                  color: course.color,
+                  color: "white",
                 }}
               >
                 {course.code.substring(0, 2)}
@@ -168,15 +211,38 @@ export function TeachingCourses() {
             <div style={{ flex: 1, minWidth: 0 }}>
               <div
                 style={{
-                  fontSize: "14px",
-                  fontWeight: "600",
-                  color: "#1e293b",
-                  marginBottom: "2px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  marginBottom: "4px",
                 }}
               >
-                {course.title}
+                <span
+                  style={{
+                    fontSize: "14px",
+                    fontWeight: "700",
+                    color: "#0F172A",
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                  }}
+                >
+                  {course.title}
+                </span>
+                <span
+                  style={{
+                    fontSize: "13px",
+                    fontWeight: "800",
+                    color: course.color,
+                    flexShrink: 0,
+                    marginLeft: "8px",
+                  }}
+                >
+                  {course.progress}%
+                </span>
               </div>
 
+              {/* Meta */}
               <div
                 style={{
                   display: "flex",
@@ -187,69 +253,74 @@ export function TeachingCourses() {
               >
                 <span
                   style={{
-                    fontSize: "12px",
-                    color: "#94a3b8",
+                    fontSize: "11px",
+                    color: "#94A3B8",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "3px",
                   }}
                 >
-                  {course.code}
+                  <Users size={10} />
+                  {course.students} students
                 </span>
                 <span
                   style={{
+                    fontSize: "11px",
+                    color: "#94A3B8",
                     display: "flex",
                     alignItems: "center",
-                    gap: "4px",
-                    fontSize: "12px",
-                    color: "#64748b",
+                    gap: "3px",
                   }}
                 >
-                  <Users size={12} />
-                  {course.students} students
+                  <Clock size={10} />
+                  {course.nextClass}
+                </span>
+                <span
+                  style={{
+                    fontSize: "11px",
+                    fontWeight: "700",
+                    color: "#059669",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "3px",
+                    background: "#ECFDF5",
+                    padding: "2px 8px",
+                    borderRadius: "10px",
+                  }}
+                >
+                  <TrendingUp size={10} />
+                  {course.trend}
                 </span>
               </div>
 
-              {/* Progress */}
+              {/* Progress Bar */}
               <div
                 style={{
-                  height: "4px",
-                  background: "#f1f5f9",
-                  borderRadius: "2px",
+                  height: "5px",
+                  background: "#F1F5F9",
+                  borderRadius: "3px",
                   overflow: "hidden",
                 }}
               >
-                <div
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{
+                    width: `${course.progress}%`,
+                  }}
+                  transition={{
+                    delay: index * 0.1 + 0.3,
+                    duration: 0.8,
+                    ease: "easeOut",
+                  }}
                   style={{
                     height: "100%",
-                    width: `${course.progress}%`,
-                    background: course.color,
-                    borderRadius: "2px",
+                    background: course.gradient,
+                    borderRadius: "3px",
                   }}
                 />
               </div>
             </div>
-
-            {/* Right Side */}
-            <div style={{ textAlign: "right", flexShrink: 0 }}>
-              <div
-                style={{
-                  fontSize: "13px",
-                  fontWeight: "700",
-                  color: course.color,
-                  marginBottom: "4px",
-                }}
-              >
-                {course.progress}%
-              </div>
-              <div
-                style={{
-                  fontSize: "10px",
-                  color: "#94a3b8",
-                  whiteSpace: "nowrap",
-                }}
-              >
-                {course.nextClass}
-              </div>
-            </div>
-          </a>
+          </motion.div>
         ))}
       </div>
     </div>
