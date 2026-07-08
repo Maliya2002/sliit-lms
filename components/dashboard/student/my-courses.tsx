@@ -5,7 +5,6 @@ import { motion } from "framer-motion"
 import {
   BookOpen,
   ChevronRight,
-  Users,
   Clock,
 } from "lucide-react"
 

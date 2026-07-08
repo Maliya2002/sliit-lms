@@ -2,7 +2,7 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { Search, Bell } from "lucide-react"
+import { Search,  } from "lucide-react"
 import { NotificationBell } from "@/components/notifications/notification-bell"
 
 interface Props {
