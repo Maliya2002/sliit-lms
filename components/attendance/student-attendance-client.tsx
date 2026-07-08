@@ -1,48 +1,74 @@
-// components/grades/student-grades-client.tsx
+// components/attendance/student-attendance-client.tsx
 "use client"
 
 import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { Award, TrendingUp, ChevronDown } from "lucide-react"
-import {
-  getGradeColor,
-  calculateCGPA,
-} from "@/lib/grade-calculator"
+import { ChevronDown, AlertTriangle, CheckCircle } from "lucide-react"
 
-interface CourseGrade {
+interface AttendanceRecord {
+  session: {
+    date: string
+    topic: string | null
+  }
+  status: string
+}
+
+interface CourseAttendance {
   course: {
     id: string
     title: string
     code: string
-    credits: number
   }
-  assignments: {
-    items: Array<{
-      title: string
-      marks: number | null
-      maxMarks: number
-    }>
-    total: number
-    maxTotal: number
-    percentage: number | null
-  }
-  quizzes: {
-    bestScore: number | null
-    totalAttempts: number
-  }
-  publishedGrade: {
-    marks: number
-    grade: string | null
-    gpa: number | null
-    remarks: string | null
-    publishedAt: Date | null
-  } | null
+  totalSessions: number
+  attended: number
+  absent: number
+  percentage: number
+  recentRecords: AttendanceRecord[]
 }
 
-export function StudentGradesClient() {
-  const [grades, setGrades] = useState<CourseGrade[]>([])
+const STATUS_CONFIG: Record<
+  string,
+  {
+    color: string
+    bg: string
+    label: string
+    emoji: string
+  }
+> = {
+  PRESENT: {
+    color: "#059669",
+    bg: "#ECFDF5",
+    label: "Present",
+    emoji: "✅",
+  },
+  LATE: {
+    color: "#F59E0B",
+    bg: "#FFFBEB",
+    label: "Late",
+    emoji: "⏰",
+  },
+  ABSENT: {
+    color: "#E11D48",
+    bg: "#FFF1F2",
+    label: "Absent",
+    emoji: "❌",
+  },
+  EXCUSED: {
+    color: "#0066FF",
+    bg: "#EFF6FF",
+    label: "Excused",
+    emoji: "📋",
+  },
+}
+
+export function StudentAttendanceClient() {
+  const [attendance, setAttendance] = useState<
+    CourseAttendance[]
+  >([])
   const [isLoading, setIsLoading] = useState(true)
-  const [expanded, setExpanded] = useState<string | null>(null)
+  const [expanded, setExpanded] = useState<string | null>(
+    null
+  )
 
   useEffect(() => {
     let cancelled = false
@@ -50,13 +76,13 @@ export function StudentGradesClient() {
     async function load() {
       try {
         setIsLoading(true)
-        const res = await fetch("/api/grades")
+        const res = await fetch("/api/attendance/student")
         const data = await res.json()
         if (!cancelled && res.ok) {
-          setGrades(data.grades || [])
+          setAttendance(data.attendance || [])
         }
       } catch (error) {
-        console.error("Load grades error:", error)
+        console.error("Load attendance error:", error)
       } finally {
         if (!cancelled) setIsLoading(false)
       }
@@ -68,41 +94,39 @@ export function StudentGradesClient() {
     }
   }, [])
 
-  const publishedGrades = grades
-    .filter((g) => g.publishedGrade?.gpa)
-    .map((g) => ({
-      gradePoint: g.publishedGrade!.gpa!,
-      credits: g.course.credits,
-    }))
-
-  const cgpa = calculateCGPA(publishedGrades)
+  const avgAttendance =
+    attendance.length > 0
+      ? Math.round(
+          attendance.reduce(
+            (sum, a) => sum + a.percentage,
+            0
+          ) / attendance.length
+        )
+      : 0
 
   if (isLoading) {
     return (
       <div style={{ padding: "28px 32px" }}>
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(3, 1fr)",
-            gap: "16px",
-            marginBottom: "24px",
-          }}
-        >
-          {[1, 2, 3].map((i) => (
-            <div
-              key={i}
-              style={{
-                height: "100px",
-                background:
-                  "linear-gradient(90deg, #F1F5F9 25%, #E2E8F0 50%, #F1F5F9 75%)",
-                backgroundSize: "200% 100%",
-                animation: "skeleton 1.5s infinite",
-                borderRadius: "20px",
-              }}
-            />
-          ))}
-        </div>
-        <style>{`@keyframes skeleton { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }`}</style>
+        {[1, 2, 3].map((i) => (
+          <div
+            key={i}
+            style={{
+              height: "120px",
+              background:
+                "linear-gradient(90deg, #F1F5F9 25%, #E2E8F0 50%, #F1F5F9 75%)",
+              backgroundSize: "200% 100%",
+              animation: "skeleton 1.5s infinite",
+              borderRadius: "20px",
+              marginBottom: "12px",
+            }}
+          />
+        ))}
+        <style>{`
+          @keyframes skeleton {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+          }
+        `}</style>
       </div>
     )
   }
@@ -115,200 +139,106 @@ export function StudentGradesClient() {
         minHeight: "calc(100vh - 76px)",
       }}
     >
-      {/* CGPA Hero Card */}
-      {cgpa > 0 && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
+      {/* Summary Stats */}
+      {attendance.length > 0 && (
+        <div
           style={{
-            background:
-              "linear-gradient(135deg, #0F172A 0%, #1E1B4B 50%, #312E81 100%)",
-            borderRadius: "24px",
-            padding: "36px 40px",
+            display: "grid",
+            gridTemplateColumns: "repeat(3, 1fr)",
+            gap: "16px",
             marginBottom: "24px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            position: "relative",
-            overflow: "hidden",
           }}
         >
-          {/* BG effects */}
-          <div
-            style={{
-              position: "absolute",
-              top: "-50px",
-              right: "-50px",
-              width: "200px",
-              height: "200px",
-              borderRadius: "50%",
-              background:
-                "radial-gradient(circle, rgba(124,58,237,0.3) 0%, transparent 70%)",
-              filter: "blur(40px)",
-            }}
-          />
-
-          <div style={{ position: "relative" }}>
-            <div
+          {[
+            {
+              label: "Enrolled Courses",
+              value: attendance.length,
+              emoji: "📚",
+              gradient:
+                "linear-gradient(135deg, #0066FF, #6C3AED)",
+            },
+            {
+              label: "Avg Attendance",
+              value: `${avgAttendance}%`,
+              emoji: "📊",
+              gradient:
+                avgAttendance >= 75
+                  ? "linear-gradient(135deg, #059669, #0D9488)"
+                  : "linear-gradient(135deg, #F59E0B, #EF4444)",
+            },
+            {
+              label: "Total Classes",
+              value: attendance.reduce(
+                (sum, a) => sum + a.totalSessions,
+                0
+              ),
+              emoji: "🎓",
+              gradient:
+                "linear-gradient(135deg, #7C3AED, #EC4899)",
+            },
+          ].map((stat, i) => (
+            <motion.div
+              key={stat.label}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.1 }}
+              whileHover={{ y: -4 }}
               style={{
-                fontSize: "13px",
-                fontWeight: "600",
-                color: "rgba(255,255,255,0.6)",
-                marginBottom: "8px",
-                textTransform: "uppercase",
-                letterSpacing: "0.1em",
-              }}
-            >
-              Current CGPA
-            </div>
-            <div
-              style={{
-                fontSize: "64px",
-                fontWeight: "900",
-                color: "white",
-                lineHeight: 1,
-                letterSpacing: "-0.04em",
-                marginBottom: "8px",
-              }}
-            >
-              {cgpa.toFixed(2)}
-              <span
-                style={{
-                  fontSize: "24px",
-                  color: "rgba(255,255,255,0.5)",
-                  marginLeft: "4px",
-                }}
-              >
-                /4.0
-              </span>
-            </div>
-            <div
-              style={{
-                fontSize: "14px",
-                color: "rgba(255,255,255,0.5)",
-              }}
-            >
-              Based on {publishedGrades.length} published grade
-              {publishedGrades.length !== 1 ? "s" : ""}
-            </div>
-          </div>
-
-          <div
-            style={{
-              width: "90px",
-              height: "90px",
-              borderRadius: "50%",
-              background: "rgba(255,255,255,0.08)",
-              border: "1px solid rgba(255,255,255,0.12)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              position: "relative",
-            }}
-          >
-            <TrendingUp size={40} color="white" />
-          </div>
-        </motion.div>
-      )}
-
-      {/* Summary Stats */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(3, 1fr)",
-          gap: "16px",
-          marginBottom: "24px",
-        }}
-      >
-        {[
-          {
-            label: "Enrolled Courses",
-            value: grades.length,
-            emoji: "📚",
-            gradient:
-              "linear-gradient(135deg, #0066FF, #6C3AED)",
-            bg: "linear-gradient(135deg, #EFF6FF, #DBEAFE)",
-          },
-          {
-            label: "Results Published",
-            value: grades.filter((g) => g.publishedGrade)
-              .length,
-            emoji: "✅",
-            gradient:
-              "linear-gradient(135deg, #059669, #0D9488)",
-            bg: "linear-gradient(135deg, #ECFDF5, #D1FAE5)",
-          },
-          {
-            label: "Pending Results",
-            value: grades.filter((g) => !g.publishedGrade)
-              .length,
-            emoji: "⏳",
-            gradient:
-              "linear-gradient(135deg, #F59E0B, #EF4444)",
-            bg: "linear-gradient(135deg, #FFFBEB, #FEF3C7)",
-          },
-        ].map((stat, i) => (
-          <motion.div
-            key={stat.label}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.1 }}
-            whileHover={{ y: -4 }}
-            style={{
-              background: "white",
-              borderRadius: "20px",
-              padding: "20px 24px",
-              border: "1px solid #F1F5F9",
-              boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
-              display: "flex",
-              alignItems: "center",
-              gap: "16px",
-            }}
-          >
-            <div
-              style={{
-                width: "52px",
-                height: "52px",
-                borderRadius: "16px",
-                background: stat.gradient,
+                background: "white",
+                borderRadius: "20px",
+                padding: "20px 24px",
+                border: "1px solid #F1F5F9",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
                 display: "flex",
                 alignItems: "center",
-                justifyContent: "center",
-                fontSize: "24px",
-                flexShrink: 0,
+                gap: "16px",
               }}
             >
-              {stat.emoji}
-            </div>
-            <div>
               <div
                 style={{
-                  fontSize: "30px",
-                  fontWeight: "900",
-                  color: "#0F172A",
-                  lineHeight: 1,
-                  letterSpacing: "-0.02em",
+                  width: "52px",
+                  height: "52px",
+                  borderRadius: "16px",
+                  background: stat.gradient,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: "24px",
+                  flexShrink: 0,
                 }}
               >
-                {stat.value}
+                {stat.emoji}
               </div>
-              <div
-                style={{
-                  fontSize: "12px",
-                  color: "#94A3B8",
-                  fontWeight: "500",
-                  marginTop: "2px",
-                }}
-              >
-                {stat.label}
+              <div>
+                <div
+                  style={{
+                    fontSize: "30px",
+                    fontWeight: "900",
+                    color: "#0F172A",
+                    lineHeight: 1,
+                    letterSpacing: "-0.02em",
+                  }}
+                >
+                  {stat.value}
+                </div>
+                <div
+                  style={{
+                    fontSize: "12px",
+                    color: "#94A3B8",
+                    fontWeight: "500",
+                    marginTop: "2px",
+                  }}
+                >
+                  {stat.label}
+                </div>
               </div>
-            </div>
-          </motion.div>
-        ))}
-      </div>
+            </motion.div>
+          ))}
+        </div>
+      )}
 
       {/* Empty State */}
-      {grades.length === 0 && (
+      {attendance.length === 0 && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -322,19 +252,11 @@ export function StudentGradesClient() {
         >
           <div
             style={{
-              width: "80px",
-              height: "80px",
-              background:
-                "linear-gradient(135deg, #EFF6FF, #DBEAFE)",
-              borderRadius: "24px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              margin: "0 auto 20px",
-              fontSize: "40px",
+              fontSize: "64px",
+              marginBottom: "20px",
             }}
           >
-            📊
+            📅
           </div>
           <h3
             style={{
@@ -344,15 +266,18 @@ export function StudentGradesClient() {
               marginBottom: "8px",
             }}
           >
-            No grades yet
+            No attendance records yet
           </h3>
-          <p style={{ color: "#94A3B8", fontSize: "14px" }}>
-            Your grades will appear here once published.
+          <p
+            style={{ color: "#94A3B8", fontSize: "14px" }}
+          >
+            Records will appear once lecturers start
+            marking attendance.
           </p>
         </motion.div>
       )}
 
-      {/* Grade Cards */}
+      {/* Attendance Cards */}
       <div
         style={{
           display: "flex",
@@ -360,22 +285,21 @@ export function StudentGradesClient() {
           gap: "12px",
         }}
       >
-        {grades.map((item, index) => {
-          const gradeColor = item.publishedGrade?.grade
-            ? getGradeColor(item.publishedGrade.grade)
-            : { color: "#94A3B8", bg: "#F8FAFC" }
-
+        {attendance.map((item, index) => {
           const isExpanded = expanded === item.course.id
-          const percentage = item.publishedGrade
-            ? Math.round(
-                (item.publishedGrade.marks / 100) * 100
-              )
-            : 0
+          const isLow = item.percentage < 75
 
-          const barColor =
-            percentage >= 75
+          const barGradient =
+            item.percentage >= 75
+              ? "linear-gradient(90deg, #059669, #0D9488)"
+              : item.percentage >= 50
+              ? "linear-gradient(90deg, #F59E0B, #EF4444)"
+              : "linear-gradient(90deg, #E11D48, #F59E0B)"
+
+          const percentColor =
+            item.percentage >= 75
               ? "#059669"
-              : percentage >= 50
+              : item.percentage >= 50
               ? "#F59E0B"
               : "#E11D48"
 
@@ -388,8 +312,14 @@ export function StudentGradesClient() {
               style={{
                 background: "white",
                 borderRadius: "20px",
-                border: "1px solid #F1F5F9",
-                boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
+                border: `1px solid ${
+                  isLow ? "#FECDD3" : "#F1F5F9"
+                }`,
+                boxShadow: `0 2px 8px ${
+                  isLow
+                    ? "rgba(225,29,72,0.05)"
+                    : "rgba(0,0,0,0.04)"
+                }`,
                 overflow: "hidden",
               }}
             >
@@ -415,8 +345,8 @@ export function StudentGradesClient() {
                     style={{
                       display: "flex",
                       alignItems: "center",
-                      gap: "10px",
-                      marginBottom: "6px",
+                      gap: "8px",
+                      marginBottom: "4px",
                     }}
                   >
                     <span
@@ -431,15 +361,25 @@ export function StudentGradesClient() {
                     >
                       {item.course.code}
                     </span>
-                    <span
-                      style={{
-                        fontSize: "11px",
-                        color: "#94A3B8",
-                        fontWeight: "500",
-                      }}
-                    >
-                      {item.course.credits} Credits
-                    </span>
+                    {isLow && (
+                      <span
+                        style={{
+                          fontSize: "10px",
+                          fontWeight: "700",
+                          color: "#E11D48",
+                          background: "#FFF1F2",
+                          padding: "3px 8px",
+                          borderRadius: "20px",
+                          border: "1px solid #FECDD3",
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: "4px",
+                        }}
+                      >
+                        <AlertTriangle size={10} />
+                        Low
+                      </span>
+                    )}
                   </div>
 
                   <h3
@@ -447,7 +387,7 @@ export function StudentGradesClient() {
                       fontSize: "16px",
                       fontWeight: "800",
                       color: "#0F172A",
-                      margin: "0 0 10px",
+                      margin: "0 0 12px",
                       letterSpacing: "-0.01em",
                     }}
                   >
@@ -455,44 +395,80 @@ export function StudentGradesClient() {
                   </h3>
 
                   {/* Progress Bar */}
-                  {item.publishedGrade && (
-                    <div>
-                      <div
+                  <div
+                    style={{
+                      height: "8px",
+                      background: "#F1F5F9",
+                      borderRadius: "4px",
+                      overflow: "hidden",
+                      marginBottom: "8px",
+                    }}
+                  >
+                    <motion.div
+                      initial={{ width: 0 }}
+                      animate={{
+                        width: `${item.percentage}%`,
+                      }}
+                      transition={{
+                        delay: index * 0.1 + 0.3,
+                        duration: 0.8,
+                        ease: "easeOut",
+                      }}
+                      style={{
+                        height: "100%",
+                        background: barGradient,
+                        borderRadius: "4px",
+                      }}
+                    />
+                  </div>
+
+                  {/* Stats */}
+                  <div
+                    style={{
+                      display: "flex",
+                      gap: "16px",
+                      flexWrap: "wrap",
+                    }}
+                  >
+                    {[
+                      {
+                        label: "Total",
+                        value: item.totalSessions,
+                        color: "#64748B",
+                      },
+                      {
+                        label: "Attended",
+                        value: item.attended,
+                        color: "#059669",
+                      },
+                      {
+                        label: "Absent",
+                        value: item.absent,
+                        color: "#E11D48",
+                      },
+                    ].map((s) => (
+                      <span
+                        key={s.label}
                         style={{
-                          height: "6px",
-                          background: "#F1F5F9",
-                          borderRadius: "3px",
-                          overflow: "hidden",
-                          marginBottom: "4px",
+                          fontSize: "12px",
+                          color: "#64748B",
                         }}
                       >
-                        <motion.div
-                          initial={{ width: 0 }}
-                          animate={{
-                            width: `${item.publishedGrade.marks}%`,
-                          }}
-                          transition={{
-                            delay: index * 0.1 + 0.3,
-                            duration: 0.8,
-                            ease: "easeOut",
-                          }}
+                        <span
                           style={{
-                            height: "100%",
-                            background:
-                              barColor === "#059669"
-                                ? "linear-gradient(90deg, #059669, #0D9488)"
-                                : barColor === "#F59E0B"
-                                ? "linear-gradient(90deg, #F59E0B, #EF4444)"
-                                : "linear-gradient(90deg, #E11D48, #F59E0B)",
-                            borderRadius: "3px",
+                            fontWeight: "800",
+                            color: s.color,
                           }}
-                        />
-                      </div>
-                    </div>
-                  )}
+                        >
+                          {s.value}
+                        </span>{" "}
+                        {s.label}
+                      </span>
+                    ))}
+                  </div>
                 </div>
 
-                {/* Right: Grade + Expand */}
+                {/* Right */}
                 <div
                   style={{
                     display: "flex",
@@ -501,75 +477,88 @@ export function StudentGradesClient() {
                     flexShrink: 0,
                   }}
                 >
-                  {item.publishedGrade ? (
-                    <div style={{ textAlign: "center" }}>
-                      <motion.div
-                        whileHover={{ scale: 1.05 }}
-                        style={{
-                          fontSize: "28px",
-                          fontWeight: "900",
-                          color: gradeColor.color,
-                          background: gradeColor.bg,
-                          padding: "10px 18px",
-                          borderRadius: "14px",
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "6px",
-                          letterSpacing: "-0.02em",
-                        }}
-                      >
-                        <Award size={18} />
-                        {item.publishedGrade.grade}
-                      </motion.div>
-                      <div
-                        style={{
-                          fontSize: "11px",
-                          color: "#64748B",
-                          marginTop: "4px",
-                          fontWeight: "600",
-                        }}
-                      >
-                        GPA:{" "}
-                        {item.publishedGrade.gpa?.toFixed(1)}
-                      </div>
-                    </div>
-                  ) : (
+                  <div style={{ textAlign: "center" }}>
                     <div
                       style={{
-                        padding: "12px 20px",
-                        background: "#F8FAFC",
-                        borderRadius: "14px",
-                        fontSize: "12px",
-                        color: "#94A3B8",
-                        textAlign: "center",
-                        fontWeight: "600",
+                        fontSize: "36px",
+                        fontWeight: "900",
+                        color: percentColor,
+                        lineHeight: 1,
+                        letterSpacing: "-0.03em",
                       }}
                     >
-                      ⏳ Pending
+                      {item.percentage}
+                      <span style={{ fontSize: "18px" }}>
+                        %
+                      </span>
                     </div>
-                  )}
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: "4px",
+                        fontSize: "11px",
+                        color: percentColor,
+                        fontWeight: "600",
+                        marginTop: "2px",
+                      }}
+                    >
+                      {item.percentage >= 75 ? (
+                        <CheckCircle size={11} />
+                      ) : (
+                        <AlertTriangle size={11} />
+                      )}
+                      {item.percentage >= 75
+                        ? "Good"
+                        : "Low"}
+                    </div>
+                  </div>
 
-                  <div
-                    style={{
-                      color: "#94A3B8",
-                      transition: "transform 0.2s ease",
-                      transform: isExpanded
-                        ? "rotate(180deg)"
-                        : "none",
-                    }}
+                  <motion.div
+                    animate={{ rotate: isExpanded ? 180 : 0 }}
+                    transition={{ duration: 0.2 }}
+                    style={{ color: "#94A3B8" }}
                   >
                     <ChevronDown size={20} />
-                  </div>
+                  </motion.div>
                 </div>
               </div>
 
-              {/* Expanded Content */}
+              {/* Warning Banner */}
+              {isLow && (
+                <div
+                  style={{
+                    margin: "0 24px 16px",
+                    background:
+                      "linear-gradient(135deg, #FFF1F2, #FFE4E6)",
+                    border: "1px solid #FECDD3",
+                    borderRadius: "12px",
+                    padding: "12px 16px",
+                    fontSize: "12px",
+                    color: "#9F1239",
+                    fontWeight: "500",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                  }}
+                >
+                  <AlertTriangle size={14} />
+                  Attendance below 75% — you may not be
+                  eligible for the final exam.
+                </div>
+              )}
+
+              {/* Expanded Records */}
               <AnimatePresence>
                 {isExpanded &&
-                  item.assignments.items.length > 0 && (
+                  item.recentRecords.length > 0 && (
                     <motion.div
                       initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: "auto", opacity: 1 }}
+                      animate={{
+                        height: "auto",
+                        opacity: 1,
+                      }}
                       exit={{ height: 0, opacity: 0 }}
                       transition={{ duration: 0.25 }}
                       style={{
@@ -578,7 +567,9 @@ export function StudentGradesClient() {
                         overflow: "hidden",
                       }}
                     >
-                      <div style={{ padding: "16px 24px" }}>
+                      <div
+                        style={{ padding: "16px 24px" }}
+                      >
                         <p
                           style={{
                             fontSize: "11px",
@@ -589,62 +580,79 @@ export function StudentGradesClient() {
                             marginBottom: "12px",
                           }}
                         >
-                          Assignment Breakdown
+                          Recent Sessions
                         </p>
-                        {item.assignments.items.map(
-                          (a, i) => (
-                            <div
-                              key={i}
-                              style={{
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent:
-                                  "space-between",
-                                padding: "10px 0",
-                                borderBottom:
-                                  i <
-                                  item.assignments.items
-                                    .length -
-                                    1
-                                    ? "1px solid #F1F5F9"
-                                    : "none",
-                              }}
-                            >
-                              <span
+                        {item.recentRecords.map(
+                          (record, i) => {
+                            const sc =
+                              STATUS_CONFIG[
+                                record.status
+                              ] || STATUS_CONFIG.ABSENT
+
+                            return (
+                              <div
+                                key={i}
                                 style={{
-                                  fontSize: "13px",
-                                  color: "#0F172A",
-                                  fontWeight: "500",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent:
+                                    "space-between",
+                                  padding: "10px 0",
+                                  borderBottom:
+                                    i <
+                                    item.recentRecords
+                                      .length -
+                                      1
+                                      ? "1px solid #F1F5F9"
+                                      : "none",
                                 }}
                               >
-                                {a.title}
-                              </span>
-                              {a.marks !== null ? (
+                                <div>
+                                  <div
+                                    style={{
+                                      fontSize: "13px",
+                                      fontWeight: "600",
+                                      color: "#0F172A",
+                                    }}
+                                  >
+                                    {new Date(
+                                      record.session.date
+                                    ).toLocaleDateString(
+                                      "en-US",
+                                      {
+                                        month: "short",
+                                        day: "numeric",
+                                        year: "numeric",
+                                      }
+                                    )}
+                                  </div>
+                                  {record.session
+                                    .topic && (
+                                    <div
+                                      style={{
+                                        fontSize: "11px",
+                                        color: "#94A3B8",
+                                      }}
+                                    >
+                                      {record.session.topic}
+                                    </div>
+                                  )}
+                                </div>
                                 <span
                                   style={{
-                                    fontSize: "13px",
-                                    fontWeight: "800",
-                                    color: "#0066FF",
-                                    background: "#EFF6FF",
-                                    padding: "3px 12px",
+                                    fontSize: "11px",
+                                    fontWeight: "700",
+                                    background: sc.bg,
+                                    color: sc.color,
+                                    padding: "4px 12px",
                                     borderRadius: "20px",
                                   }}
                                 >
-                                  {a.marks}/{a.maxMarks}
+                                  {sc.emoji} {sc.label}
                                 </span>
-                              ) : (
-                                <span
-                                  style={{
-                                    fontSize: "12px",
-                                    color: "#94A3B8",
-                                    fontWeight: "500",
-                                  }}
-                                >
-                                  Not graded
-                                </span>
-                              )}
-                            </div>
-                          )
+                              </div>
+                            )
+                          }
                         )}
                       </div>
                     </motion.div>

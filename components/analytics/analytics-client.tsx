@@ -2,6 +2,8 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { motion } from "framer-motion"
+import { RefreshCw } from "lucide-react"
 import { StatsOverview } from "./stats-overview"
 import { UserGrowthChart } from "./user-growth-chart"
 import { EnrollmentChart } from "./enrollment-chart"
@@ -52,12 +54,10 @@ interface AnalyticsData {
 }
 
 export function AnalyticsClient() {
-  const [data, setData] = useState<AnalyticsData | null>(
-    null
-  )
+  const [data, setData] = useState<AnalyticsData | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const [lastUpdated, setLastUpdated] =
-    useState<Date | null>(null)
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null)
+  const [isRefreshing, setIsRefreshing] = useState(false)
 
   useEffect(() => {
     let cancelled = false
@@ -79,14 +79,12 @@ export function AnalyticsClient() {
     }
 
     load()
-    return () => {
-      cancelled = true
-    }
+    return () => { cancelled = true }
   }, [])
 
   const refetch = async () => {
     try {
-      setIsLoading(true)
+      setIsRefreshing(true)
       const res = await fetch("/api/analytics")
       const json = await res.json()
       if (res.ok) {
@@ -96,36 +94,65 @@ export function AnalyticsClient() {
     } catch (error) {
       console.error("Refetch error:", error)
     } finally {
-      setIsLoading(false)
+      setIsRefreshing(false)
     }
   }
 
   if (isLoading && !data) {
     return (
-      <div style={{ padding: "28px" }}>
+      <div
+        style={{
+          padding: "28px 32px",
+          background: "#F8FAFC",
+          minHeight: "calc(100vh - 76px)",
+        }}
+      >
+        {/* Loading skeleton */}
         <div
           style={{
-            textAlign: "center",
-            padding: "80px",
-            color: "#94a3b8",
+            display: "grid",
+            gridTemplateColumns: "repeat(4, 1fr)",
+            gap: "16px",
+            marginBottom: "24px",
           }}
         >
-          <div
-            style={{
-              width: "40px",
-              height: "40px",
-              border: "3px solid #e2e8f0",
-              borderTop: "3px solid #dc2626",
-              borderRadius: "50%",
-              animation: "spin 0.8s linear infinite",
-              margin: "0 auto 16px",
-            }}
-          />
-          <p style={{ fontSize: "15px" }}>
-            Loading analytics data...
-          </p>
-          <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+          {[1, 2, 3, 4].map((i) => (
+            <div
+              key={i}
+              style={{
+                height: "130px",
+                background:
+                  "linear-gradient(90deg, #F1F5F9 25%, #E2E8F0 50%, #F1F5F9 75%)",
+                backgroundSize: "200% 100%",
+                animation: "skeleton 1.5s infinite",
+                borderRadius: "20px",
+              }}
+            />
+          ))}
         </div>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1.5fr 1fr",
+            gap: "20px",
+            marginBottom: "20px",
+          }}
+        >
+          {[1, 2].map((i) => (
+            <div
+              key={i}
+              style={{
+                height: "280px",
+                background:
+                  "linear-gradient(90deg, #F1F5F9 25%, #E2E8F0 50%, #F1F5F9 75%)",
+                backgroundSize: "200% 100%",
+                animation: "skeleton 1.5s infinite",
+                borderRadius: "20px",
+              }}
+            />
+          ))}
+        </div>
+        <style>{`@keyframes skeleton { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }`}</style>
       </div>
     )
   }
@@ -133,39 +160,89 @@ export function AnalyticsClient() {
   if (!data) return null
 
   return (
-    <div style={{ padding: "28px" }}>
+    <div
+      style={{
+        padding: "28px 32px",
+        background: "#F8FAFC",
+        minHeight: "calc(100vh - 76px)",
+      }}
+    >
       {/* Refresh Bar */}
-      <div
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
         style={{
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          marginBottom: "20px",
+          marginBottom: "24px",
+          padding: "12px 20px",
+          background: "white",
+          borderRadius: "14px",
+          border: "1px solid #F1F5F9",
         }}
       >
-        <p style={{ fontSize: "13px", color: "#94a3b8" }}>
-          {lastUpdated
-            ? `Last updated: ${lastUpdated.toLocaleTimeString()}`
-            : ""}
-        </p>
-        <button
-          type="button"
+        <div>
+          <p
+            style={{
+              fontSize: "14px",
+              fontWeight: "600",
+              color: "#0F172A",
+              margin: 0,
+            }}
+          >
+            📊 System Analytics
+          </p>
+          <p
+            style={{
+              fontSize: "12px",
+              color: "#94A3B8",
+              margin: 0,
+            }}
+          >
+            {lastUpdated
+              ? `Updated ${lastUpdated.toLocaleTimeString()}`
+              : "Loading..."}
+          </p>
+        </div>
+
+        <motion.button
+          whileHover={{ scale: 1.04 }}
+          whileTap={{ scale: 0.97 }}
           onClick={refetch}
-          disabled={isLoading}
+          disabled={isRefreshing}
           style={{
-            padding: "8px 16px",
-            background: isLoading ? "#f1f5f9" : "#dc2626",
-            color: isLoading ? "#94a3b8" : "white",
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+            padding: "9px 18px",
+            background: isRefreshing
+              ? "#F1F5F9"
+              : "linear-gradient(135deg, #E11D48, #7C3AED)",
+            color: isRefreshing ? "#94A3B8" : "white",
             border: "none",
-            borderRadius: "8px",
+            borderRadius: "10px",
             fontSize: "13px",
-            fontWeight: "600",
-            cursor: isLoading ? "not-allowed" : "pointer",
+            fontWeight: "700",
+            cursor: isRefreshing ? "not-allowed" : "pointer",
+            boxShadow: isRefreshing
+              ? "none"
+              : "0 4px 14px rgba(225,29,72,0.3)",
           }}
         >
-          {isLoading ? "Refreshing..." : "🔄 Refresh"}
-        </button>
-      </div>
+          <motion.div
+            animate={{ rotate: isRefreshing ? 360 : 0 }}
+            transition={{
+              duration: 1,
+              repeat: isRefreshing ? Infinity : 0,
+              ease: "linear",
+            }}
+          >
+            <RefreshCw size={14} />
+          </motion.div>
+          {isRefreshing ? "Refreshing..." : "Refresh"}
+        </motion.button>
+      </motion.div>
 
       {/* Stats Overview */}
       <StatsOverview overview={data.overview} />
@@ -179,8 +256,20 @@ export function AnalyticsClient() {
           marginBottom: "20px",
         }}
       >
-        <UserGrowthChart data={data.userGrowth} />
-        <RoleChart data={data.roleData} />
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
+        >
+          <UserGrowthChart data={data.userGrowth} />
+        </motion.div>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.6 }}
+        >
+          <RoleChart data={data.roleData} />
+        </motion.div>
       </div>
 
       {/* Charts Row 2 */}
@@ -192,12 +281,30 @@ export function AnalyticsClient() {
           marginBottom: "20px",
         }}
       >
-        <EnrollmentChart data={data.enrollmentData} />
-        <SubmissionPieChart data={data.submissionData} />
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.7 }}
+        >
+          <EnrollmentChart data={data.enrollmentData} />
+        </motion.div>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.8 }}
+        >
+          <SubmissionPieChart data={data.submissionData} />
+        </motion.div>
       </div>
 
       {/* Recent Activity */}
-      <RecentActivity activities={data.recentActivity} />
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.9 }}
+      >
+        <RecentActivity activities={data.recentActivity} />
+      </motion.div>
     </div>
   )
 }

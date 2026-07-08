@@ -2,9 +2,9 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
-import { Bell, CheckCheck, X } from "lucide-react"
+import { motion, AnimatePresence } from "framer-motion"
+import { Bell, CheckCheck, X, Inbox } from "lucide-react"
 import { NotificationItem } from "./notification-item"
-import { useRouter } from "next/navigation"
 
 interface Notification {
   id: string
@@ -17,15 +17,11 @@ interface Notification {
 }
 
 export function NotificationBell() {
-  const router = useRouter()
-  const [notifications, setNotifications] = useState<
-    Notification[]
-  >([])
+  const [notifications, setNotifications] = useState<Notification[]>([])
   const [unreadCount, setUnreadCount] = useState(0)
   const [isOpen, setIsOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
-  // Load notifications
   useEffect(() => {
     let cancelled = false
 
@@ -43,8 +39,6 @@ export function NotificationBell() {
     }
 
     load()
-
-    // Poll every 30 seconds
     const interval = setInterval(load, 30000)
     return () => {
       cancelled = true
@@ -52,7 +46,6 @@ export function NotificationBell() {
     }
   }, [])
 
-  // Close on outside click
   useEffect(() => {
     function handler(e: MouseEvent) {
       if (
@@ -63,8 +56,7 @@ export function NotificationBell() {
       }
     }
     document.addEventListener("mousedown", handler)
-    return () =>
-      document.removeEventListener("mousedown", handler)
+    return () => document.removeEventListener("mousedown", handler)
   }, [])
 
   const markRead = async (id: string) => {
@@ -100,229 +92,269 @@ export function NotificationBell() {
   return (
     <div ref={dropdownRef} style={{ position: "relative" }}>
       {/* Bell Button */}
-      <button
+      <motion.button
+        whileHover={{ scale: 1.08 }}
+        whileTap={{ scale: 0.92 }}
         type="button"
         onClick={() => setIsOpen(!isOpen)}
         style={{
           position: "relative",
           width: "40px",
           height: "40px",
-          borderRadius: "10px",
-          background: "#f8fafc",
-          border: "1px solid #e2e8f0",
+          borderRadius: "12px",
+          background: isOpen ? "#EFF6FF" : "#F8FAFC",
+          border: `1.5px solid ${isOpen ? "#BFDBFE" : "#E2E8F0"}`,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
           cursor: "pointer",
-          color: "#64748b",
+          color: isOpen ? "#0066FF" : "#64748B",
+          transition: "all 0.2s ease",
         }}
       >
         <Bell size={18} />
 
         {/* Badge */}
-        {unreadCount > 0 && (
-          <div
-            style={{
-              position: "absolute",
-              top: "-4px",
-              right: "-4px",
-              minWidth: "18px",
-              height: "18px",
-              background: "#dc2626",
-              borderRadius: "9px",
-              border: "2px solid white",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: "10px",
-              fontWeight: "700",
-              color: "white",
-              padding: "0 4px",
-            }}
-          >
-            {unreadCount > 99 ? "99+" : unreadCount}
-          </div>
-        )}
-      </button>
+        <AnimatePresence>
+          {unreadCount > 0 && (
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0 }}
+              style={{
+                position: "absolute",
+                top: "-6px",
+                right: "-6px",
+                minWidth: "18px",
+                height: "18px",
+                background:
+                  "linear-gradient(135deg, #E11D48, #F59E0B)",
+                borderRadius: "9px",
+                border: "2px solid white",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: "10px",
+                fontWeight: "800",
+                color: "white",
+                padding: "0 4px",
+                boxShadow: "0 2px 8px rgba(225,29,72,0.4)",
+              }}
+            >
+              {unreadCount > 99 ? "99+" : unreadCount}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.button>
 
       {/* Dropdown */}
-      {isOpen && (
-        <div
-          style={{
-            position: "absolute",
-            right: 0,
-            top: "48px",
-            width: "360px",
-            background: "white",
-            borderRadius: "16px",
-            border: "1px solid #e2e8f0",
-            boxShadow: "0 16px 40px rgba(0,0,0,0.15)",
-            zIndex: 100,
-            overflow: "hidden",
-          }}
-        >
-          {/* Header */}
-          <div
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: -8 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: -8 }}
+            transition={{ type: "spring", stiffness: 300, damping: 25 }}
             style={{
-              padding: "16px 20px",
-              borderBottom: "1px solid #f1f5f9",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
+              position: "absolute",
+              right: 0,
+              top: "52px",
+              width: "380px",
+              background: "white",
+              borderRadius: "20px",
+              border: "1px solid #E2E8F0",
+              boxShadow: "0 20px 60px rgba(0,0,0,0.15)",
+              zIndex: 100,
+              overflow: "hidden",
             }}
           >
-            <div>
-              <h3
-                style={{
-                  fontSize: "15px",
-                  fontWeight: "700",
-                  color: "#1e293b",
-                  margin: 0,
-                }}
-              >
-                Notifications
-              </h3>
-              {unreadCount > 0 && (
-                <p
+            {/* Header */}
+            <div
+              style={{
+                padding: "16px 20px",
+                borderBottom: "1px solid #F8FAFC",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                background:
+                  "linear-gradient(135deg, #F8FAFC, white)",
+              }}
+            >
+              <div>
+                <h3
                   style={{
-                    fontSize: "12px",
-                    color: "#2563eb",
+                    fontSize: "15px",
+                    fontWeight: "800",
+                    color: "#0F172A",
                     margin: 0,
+                    letterSpacing: "-0.01em",
                   }}
                 >
-                  {unreadCount} unread
-                </p>
-              )}
-            </div>
+                  Notifications
+                </h3>
+                {unreadCount > 0 && (
+                  <p
+                    style={{
+                      fontSize: "12px",
+                      color: "#0066FF",
+                      margin: 0,
+                      fontWeight: "600",
+                    }}
+                  >
+                    {unreadCount} unread
+                  </p>
+                )}
+              </div>
 
-            <div style={{ display: "flex", gap: "8px" }}>
-              {unreadCount > 0 && (
-                <button
-                  type="button"
-                  onClick={markAllRead}
-                  title="Mark all as read"
+              <div
+                style={{ display: "flex", gap: "8px" }}
+              >
+                {unreadCount > 0 && (
+                  <motion.button
+                    whileHover={{ scale: 1.08 }}
+                    whileTap={{ scale: 0.92 }}
+                    onClick={markAllRead}
+                    title="Mark all as read"
+                    style={{
+                      width: "34px",
+                      height: "34px",
+                      borderRadius: "10px",
+                      background: "#EFF6FF",
+                      border: "none",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      cursor: "pointer",
+                      color: "#0066FF",
+                    }}
+                  >
+                    <CheckCheck size={16} />
+                  </motion.button>
+                )}
+                <motion.button
+                  whileHover={{ scale: 1.08 }}
+                  whileTap={{ scale: 0.92 }}
+                  onClick={() => setIsOpen(false)}
                   style={{
-                    width: "32px",
-                    height: "32px",
-                    borderRadius: "8px",
-                    background: "#eff6ff",
+                    width: "34px",
+                    height: "34px",
+                    borderRadius: "10px",
+                    background: "#F8FAFC",
                     border: "none",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
                     cursor: "pointer",
-                    color: "#2563eb",
+                    color: "#64748B",
                   }}
                 >
-                  <CheckCheck size={16} />
-                </button>
+                  <X size={16} />
+                </motion.button>
+              </div>
+            </div>
+
+            {/* Notification List */}
+            <div
+              style={{
+                maxHeight: "400px",
+                overflowY: "auto",
+              }}
+            >
+              {recent.length === 0 ? (
+                <div
+                  style={{
+                    padding: "48px 20px",
+                    textAlign: "center",
+                  }}
+                >
+                  <div
+                    style={{
+                      width: "60px",
+                      height: "60px",
+                      background:
+                        "linear-gradient(135deg, #EFF6FF, #DBEAFE)",
+                      borderRadius: "18px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      margin: "0 auto 16px",
+                    }}
+                  >
+                    <Inbox size={28} color="#0066FF" />
+                  </div>
+                  <p
+                    style={{
+                      fontSize: "15px",
+                      fontWeight: "700",
+                      color: "#0F172A",
+                      margin: "0 0 4px",
+                    }}
+                  >
+                    All caught up!
+                  </p>
+                  <p
+                    style={{
+                      fontSize: "13px",
+                      color: "#94A3B8",
+                      margin: 0,
+                    }}
+                  >
+                    No notifications yet
+                  </p>
+                </div>
+              ) : (
+                recent.map((notification, index) => (
+                  <motion.div
+                    key={notification.id}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.04 }}
+                    style={{
+                      borderBottom:
+                        index < recent.length - 1
+                          ? "1px solid #F8FAFC"
+                          : "none",
+                    }}
+                  >
+                    <NotificationItem
+                      notification={notification}
+                      onMarkRead={markRead}
+                    />
+                  </motion.div>
+                ))
               )}
-              <button
-                type="button"
+            </div>
+
+            {/* Footer */}
+            <div
+              style={{
+                padding: "12px 20px",
+                borderTop: "1px solid #F8FAFC",
+                background:
+                  "linear-gradient(135deg, #F8FAFC, white)",
+              }}
+            >
+              <motion.a
+                href="/student/notifications"
+                whileHover={{ x: 4 }}
                 onClick={() => setIsOpen(false)}
                 style={{
-                  width: "32px",
-                  height: "32px",
-                  borderRadius: "8px",
-                  background: "#f8fafc",
-                  border: "none",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  cursor: "pointer",
-                  color: "#64748b",
+                  gap: "6px",
+                  fontSize: "13px",
+                  fontWeight: "700",
+                  color: "#0066FF",
+                  textDecoration: "none",
                 }}
               >
-                <X size={16} />
-              </button>
+                View All Notifications →
+              </motion.a>
             </div>
-          </div>
-
-          {/* Notification List */}
-          <div
-            style={{
-              maxHeight: "380px",
-              overflowY: "auto",
-            }}
-          >
-            {recent.length === 0 ? (
-              <div
-                style={{
-                  padding: "40px 20px",
-                  textAlign: "center",
-                  color: "#94a3b8",
-                }}
-              >
-                <div
-                  style={{
-                    fontSize: "36px",
-                    marginBottom: "12px",
-                  }}
-                >
-                  🔔
-                </div>
-                <p
-                  style={{
-                    fontSize: "14px",
-                    fontWeight: "600",
-                    color: "#1e293b",
-                    marginBottom: "4px",
-                  }}
-                >
-                  All caught up!
-                </p>
-                <p style={{ fontSize: "13px" }}>
-                  No notifications yet
-                </p>
-              </div>
-            ) : (
-              recent.map((notification, index) => (
-                <div
-                  key={notification.id}
-                  style={{
-                    borderBottom:
-                      index < recent.length - 1
-                        ? "1px solid #f1f5f9"
-                        : "none",
-                  }}
-                >
-                  <NotificationItem
-                    notification={notification}
-                    onMarkRead={markRead}
-                  />
-                </div>
-              ))
-            )}
-          </div>
-
-          {/* Footer */}
-          <div
-            style={{
-              padding: "12px 20px",
-              borderTop: "1px solid #f1f5f9",
-              textAlign: "center",
-            }}
-          >
-            <button
-              type="button"
-              onClick={() => {
-                setIsOpen(false)
-                router.push("/student/notifications")
-              }}
-              style={{
-                background: "none",
-                border: "none",
-                color: "#2563eb",
-                fontSize: "13px",
-                fontWeight: "600",
-                cursor: "pointer",
-              }}
-            >
-              View All Notifications →
-            </button>
-          </div>
-        </div>
-      )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }
