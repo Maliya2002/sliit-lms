@@ -1,12 +1,9 @@
+// components/shared/mobile-topbar.tsx
 "use client"
 
-import {
-  Menu,
-  Bell,
-  GraduationCap,
-  Shield,
-  BookOpen,
-} from "lucide-react"
+import { motion } from "framer-motion"
+import { Menu, GraduationCap, Shield, BookOpen } from "lucide-react"
+import { NotificationBell } from "@/components/notifications/notification-bell"
 import type { DashboardConfig, DashboardUser } from "@/types/dashboard"
 
 interface Props {
@@ -26,9 +23,12 @@ export function MobileTopBar({ config, user, onMenuClick }: Props) {
       : GraduationCap
 
   return (
-    <header
+    <motion.header
+      initial={{ y: -60, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ duration: 0.4, ease: "easeOut" }}
       style={{
-        height: "60px",
+        height: "64px",
         background: theme.sidebarBg,
         display: "flex",
         alignItems: "center",
@@ -37,6 +37,8 @@ export function MobileTopBar({ config, user, onMenuClick }: Props) {
         position: "sticky",
         top: 0,
         zIndex: 30,
+        borderBottom: "1px solid rgba(255,255,255,0.06)",
+        boxShadow: "0 4px 20px rgba(0,0,0,0.2)",
       }}
     >
       {/* Left: Hamburger + Logo */}
@@ -47,19 +49,20 @@ export function MobileTopBar({ config, user, onMenuClick }: Props) {
           gap: "12px",
         }}
       >
-        {/* Hamburger Button */}
-        <button
+        {/* Hamburger */}
+        <motion.button
+          whileHover={{ scale: 1.08 }}
+          whileTap={{ scale: 0.92 }}
           type="button"
           onClick={(e) => {
             e.preventDefault()
             e.stopPropagation()
-            console.log("☰ Hamburger clicked!") // Debug
             onMenuClick()
           }}
           style={{
-            background: "rgba(255,255,255,0.1)",
-            border: "none",
-            borderRadius: "8px",
+            background: "rgba(255,255,255,0.08)",
+            border: "1px solid rgba(255,255,255,0.1)",
+            borderRadius: "10px",
             width: "40px",
             height: "40px",
             display: "flex",
@@ -67,11 +70,10 @@ export function MobileTopBar({ config, user, onMenuClick }: Props) {
             justifyContent: "center",
             cursor: "pointer",
             color: "white",
-            padding: 0,
           }}
         >
-          <Menu size={22} />
-        </button>
+          <Menu size={20} />
+        </motion.button>
 
         {/* Logo */}
         <div
@@ -86,23 +88,36 @@ export function MobileTopBar({ config, user, onMenuClick }: Props) {
               width: "32px",
               height: "32px",
               background: `linear-gradient(135deg, ${theme.primary}, ${theme.primaryDark})`,
-              borderRadius: "8px",
+              borderRadius: "10px",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
+              boxShadow: `0 4px 10px ${theme.primary}40`,
             }}
           >
             <LogoIcon size={16} color="white" />
           </div>
-          <span
-            style={{
-              color: "white",
-              fontWeight: "700",
-              fontSize: "15px",
-            }}
-          >
-            SLIIT LMS
-          </span>
+          <div>
+            <span
+              style={{
+                color: "white",
+                fontWeight: "800",
+                fontSize: "16px",
+                letterSpacing: "-0.01em",
+              }}
+            >
+              SLIIT{" "}
+            </span>
+            <span
+              style={{
+                color: theme.roleLabelColor,
+                fontWeight: "300",
+                fontSize: "16px",
+              }}
+            >
+              LMS
+            </span>
+          </div>
         </div>
       </div>
 
@@ -114,36 +129,10 @@ export function MobileTopBar({ config, user, onMenuClick }: Props) {
           gap: "10px",
         }}
       >
-        {/* Bell */}
-        <div
-          style={{
-            position: "relative",
-            width: "36px",
-            height: "36px",
-            borderRadius: "8px",
-            background: "rgba(255,255,255,0.08)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            cursor: "pointer",
-          }}
-        >
-          <Bell size={18} color="white" />
-          <div
-            style={{
-              position: "absolute",
-              top: "7px",
-              right: "7px",
-              width: "7px",
-              height: "7px",
-              background: theme.primary,
-              borderRadius: "50%",
-            }}
-          />
-        </div>
+        <NotificationBell />
 
-        {/* Avatar */}
-        <div
+        <motion.div
+          whileHover={{ scale: 1.05 }}
           style={{
             width: "36px",
             height: "36px",
@@ -153,15 +142,16 @@ export function MobileTopBar({ config, user, onMenuClick }: Props) {
             alignItems: "center",
             justifyContent: "center",
             color: "white",
-            fontWeight: "700",
+            fontWeight: "800",
             fontSize: "13px",
             cursor: "pointer",
+            boxShadow: `0 4px 10px ${theme.primary}30`,
           }}
         >
           {user.firstName[0]}
           {user.lastName[0]}
-        </div>
+        </motion.div>
       </div>
-    </header>
+    </motion.header>
   )
 }

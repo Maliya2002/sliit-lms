@@ -1,8 +1,10 @@
+// components/shared/dashboard-sidebar.tsx
 "use client"
 
 import { useState, useEffect } from "react"
 import { usePathname } from "next/navigation"
 import { signOut } from "next-auth/react"
+import { motion, AnimatePresence } from "framer-motion"
 import {
   ChevronLeft,
   ChevronRight,
@@ -22,15 +24,16 @@ interface Props {
 export function DashboardSidebar({ config, user }: Props) {
   const pathname = usePathname()
   const [collapsed, setCollapsed] = useState(false)
+  const [hoveredItem, setHoveredItem] = useState<string | null>(null)
   const { theme, navigation } = config
 
-  // Auto-collapse on tablet
+  // Auto collapse on tablet
   useEffect(() => {
     const check = () => {
       const width = window.innerWidth
       if (width >= 768 && width < 1024) {
         setCollapsed(true)
-      } else if (width >= 1024) {
+      } else if (width >= 1280) {
         setCollapsed(false)
       }
     }
@@ -46,22 +49,25 @@ export function DashboardSidebar({ config, user }: Props) {
       ? BookOpen
       : GraduationCap
 
+  const initials = `${user.firstName[0]}${user.lastName[0]}`
+
   return (
-    <aside
+    <motion.aside
+      animate={{ width: collapsed ? 72 : 252 }}
+      transition={{ duration: 0.3, ease: "easeInOut" }}
       style={{
-        width: collapsed ? "72px" : "250px",
         minHeight: "100vh",
         background: theme.sidebarBg,
         display: "flex",
         flexDirection: "column",
-        transition: "width 0.3s ease",
         position: "sticky",
         top: 0,
         flexShrink: 0,
         borderRight: "1px solid rgba(255,255,255,0.06)",
+        overflow: "hidden",
       }}
     >
-      {/* ── Logo ── */}
+      {/* ── Logo Section ── */}
       <div
         style={{
           padding: "20px 14px",
@@ -69,6 +75,7 @@ export function DashboardSidebar({ config, user }: Props) {
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
+          minHeight: "72px",
         }}
       >
         <div
@@ -79,51 +86,77 @@ export function DashboardSidebar({ config, user }: Props) {
             overflow: "hidden",
           }}
         >
-          <div
+          {/* Logo Icon */}
+          <motion.div
+            whileHover={{ scale: 1.05, rotate: 5 }}
             style={{
-              width: "36px",
-              height: "36px",
+              width: "38px",
+              height: "38px",
               background: `linear-gradient(135deg, ${theme.primary}, ${theme.primaryDark})`,
-              borderRadius: "10px",
+              borderRadius: "12px",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
               flexShrink: 0,
+              boxShadow: `0 4px 14px ${theme.primary}40`,
             }}
           >
             <LogoIcon size={20} color="white" />
-          </div>
-          {!collapsed && (
-            <div>
-              <div
-                style={{
-                  color: "white",
-                  fontWeight: "700",
-                  fontSize: "15px",
-                }}
+          </motion.div>
+
+          {/* Logo Text */}
+          <AnimatePresence>
+            {!collapsed && (
+              <motion.div
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -10 }}
+                transition={{ duration: 0.2 }}
               >
-                SLIIT LMS
-              </div>
-              <div
-                style={{
-                  color: theme.roleLabelColor,
-                  fontSize: "10px",
-                  fontWeight: "600",
-                  letterSpacing: "0.05em",
-                  textTransform: "uppercase",
-                }}
-              >
-                {theme.roleLabel}
-              </div>
-            </div>
-          )}
+                <div
+                  style={{
+                    color: "white",
+                    fontWeight: "800",
+                    fontSize: "16px",
+                    lineHeight: 1,
+                    letterSpacing: "-0.01em",
+                  }}
+                >
+                  SLIIT{" "}
+                  <span
+                    style={{
+                      fontWeight: "300",
+                      color: theme.roleLabelColor,
+                    }}
+                  >
+                    LMS
+                  </span>
+                </div>
+                <div
+                  style={{
+                    color: theme.roleLabelColor,
+                    fontSize: "10px",
+                    marginTop: "2px",
+                    fontWeight: "600",
+                    letterSpacing: "0.08em",
+                    textTransform: "uppercase",
+                  }}
+                >
+                  {theme.roleLabel}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
-        <button
+        {/* Collapse Button */}
+        <motion.button
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
           onClick={() => setCollapsed(!collapsed)}
           style={{
-            background: "rgba(255,255,255,0.05)",
-            border: "none",
+            background: "rgba(255,255,255,0.06)",
+            border: "1px solid rgba(255,255,255,0.08)",
             borderRadius: "8px",
             width: "28px",
             height: "28px",
@@ -131,8 +164,9 @@ export function DashboardSidebar({ config, user }: Props) {
             alignItems: "center",
             justifyContent: "center",
             cursor: "pointer",
-            color: "#64748b",
+            color: "#64748B",
             flexShrink: 0,
+            transition: "all 0.2s ease",
           }}
         >
           {collapsed ? (
@@ -140,7 +174,7 @@ export function DashboardSidebar({ config, user }: Props) {
           ) : (
             <ChevronLeft size={14} />
           )}
-        </button>
+        </motion.button>
       </div>
 
       {/* ── Navigation ── */}
@@ -149,152 +183,302 @@ export function DashboardSidebar({ config, user }: Props) {
           flex: 1,
           padding: "12px 10px",
           overflowY: "auto",
+          overflowX: "hidden",
         }}
       >
         {navigation.map((group) => (
-          <div key={group.label} style={{ marginBottom: "8px" }}>
-            {!collapsed && (
-              <div
-                style={{
-                  color: "#374151",
-                  fontSize: "10px",
-                  fontWeight: "700",
-                  letterSpacing: "0.08em",
-                  textTransform: "uppercase",
-                  padding: "8px 12px 4px",
-                }}
-              >
-                {group.label}
-              </div>
-            )}
+          <div key={group.label} style={{ marginBottom: "6px" }}>
+            {/* Group Label */}
+            <AnimatePresence>
+              {!collapsed && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  style={{
+                    color: "#374151",
+                    fontSize: "10px",
+                    fontWeight: "700",
+                    letterSpacing: "0.1em",
+                    textTransform: "uppercase",
+                    padding: "8px 12px 4px",
+                  }}
+                >
+                  {group.label}
+                </motion.div>
+              )}
+            </AnimatePresence>
 
+            {/* Nav Items */}
             {group.items.map((item) => {
               const Icon = getIcon(item.icon)
-              const active = pathname === item.href
+              const isActive = pathname === item.href
+              const isHovered = hoveredItem === item.href
 
               return (
-                <a
+                <motion.a
                   key={item.href}
                   href={item.href}
                   title={collapsed ? item.label : undefined}
+                  whileTap={{ scale: 0.97 }}
+                  onMouseEnter={() =>
+                    setHoveredItem(item.href)
+                  }
+                  onMouseLeave={() => setHoveredItem(null)}
                   style={{
                     display: "flex",
                     alignItems: "center",
                     gap: "10px",
-                    padding: "9px 12px",
-                    borderRadius: "8px",
-                    marginBottom: "1px",
-                    background: active
-                      ? `${theme.primary}25`
-                      : "transparent",
-                    color: active
-                      ? theme.roleLabelColor
-                      : "#6b7280",
+                    padding: collapsed
+                      ? "10px"
+                      : "10px 12px",
+                    borderRadius: "12px",
+                    marginBottom: "2px",
                     textDecoration: "none",
-                    fontSize: "13px",
-                    fontWeight: active ? "600" : "400",
-                    borderLeft: active
-                      ? `2px solid ${theme.primary}`
-                      : "2px solid transparent",
-                    whiteSpace: "nowrap",
-                    overflow: "hidden",
-                    transition: "all 0.15s",
+                    position: "relative",
+                    transition: "all 0.15s ease",
+                    justifyContent: collapsed
+                      ? "center"
+                      : "flex-start",
+                    background: isActive
+                      ? `${theme.primary}20`
+                      : isHovered
+                      ? "rgba(255,255,255,0.05)"
+                      : "transparent",
+                    color: isActive
+                      ? theme.roleLabelColor
+                      : isHovered
+                      ? "rgba(255,255,255,0.9)"
+                      : "#6B7280",
                   }}
                 >
-                  <Icon size={16} style={{ flexShrink: 0 }} />
-                  {!collapsed && <span>{item.label}</span>}
-                </a>
+                  {/* Active indicator */}
+                  {isActive && (
+                    <motion.div
+                      layoutId="activeIndicator"
+                      style={{
+                        position: "absolute",
+                        left: 0,
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                        width: "3px",
+                        height: "20px",
+                        background: `linear-gradient(180deg, ${theme.primary}, ${theme.primaryDark})`,
+                        borderRadius: "0 4px 4px 0",
+                        boxShadow: `0 0 8px ${theme.primary}60`,
+                      }}
+                      transition={{
+                        type: "spring",
+                        stiffness: 300,
+                        damping: 30,
+                      }}
+                    />
+                  )}
+
+                  {/* Icon */}
+                  <div
+                    style={{
+                      width: "34px",
+                      height: "34px",
+                      borderRadius: "10px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      flexShrink: 0,
+                      background: isActive
+                        ? `${theme.primary}25`
+                        : "transparent",
+                      transition: "all 0.15s ease",
+                    }}
+                  >
+                    <Icon
+                      size={17}
+                      style={{ flexShrink: 0 }}
+                    />
+                  </div>
+
+                  {/* Label */}
+                  <AnimatePresence>
+                    {!collapsed && (
+                      <motion.span
+                        initial={{ opacity: 0, x: -5 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: -5 }}
+                        transition={{ duration: 0.15 }}
+                        style={{
+                          fontSize: "13px",
+                          fontWeight: isActive ? "700" : "500",
+                          whiteSpace: "nowrap",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                        }}
+                      >
+                        {item.label}
+                      </motion.span>
+                    )}
+                  </AnimatePresence>
+                </motion.a>
               )
             })}
           </div>
         ))}
       </nav>
 
-      {/* ── User ── */}
+      {/* ── User Profile Section ── */}
       <div
         style={{
           padding: "12px 10px",
           borderTop: "1px solid rgba(255,255,255,0.06)",
         }}
       >
-        {!collapsed && (
+        {/* User Card */}
+        <AnimatePresence>
+          {!collapsed && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 10 }}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "10px",
+                padding: "12px",
+                borderRadius: "14px",
+                background: "rgba(255,255,255,0.04)",
+                border: "1px solid rgba(255,255,255,0.06)",
+                marginBottom: "8px",
+              }}
+            >
+              {/* Avatar */}
+              <div
+                style={{
+                  width: "36px",
+                  height: "36px",
+                  borderRadius: "12px",
+                  background: theme.avatarGradient,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  color: "white",
+                  fontWeight: "800",
+                  fontSize: "13px",
+                  flexShrink: 0,
+                  boxShadow: `0 4px 10px ${theme.primary}30`,
+                }}
+              >
+                {initials}
+              </div>
+
+              {/* User Info */}
+              <div style={{ overflow: "hidden", flex: 1 }}>
+                <div
+                  style={{
+                    color: "white",
+                    fontSize: "13px",
+                    fontWeight: "700",
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                  }}
+                >
+                  {user.firstName} {user.lastName}
+                </div>
+                <div
+                  style={{
+                    color: theme.roleLabelColor,
+                    fontSize: "10px",
+                    fontWeight: "600",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.06em",
+                  }}
+                >
+                  {config.role}
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Collapsed Avatar */}
+        {collapsed && (
           <div
             style={{
               display: "flex",
-              alignItems: "center",
-              gap: "10px",
-              padding: "10px 12px",
-              borderRadius: "10px",
-              background: "rgba(255,255,255,0.04)",
-              marginBottom: "6px",
+              justifyContent: "center",
+              marginBottom: "8px",
             }}
           >
             <div
               style={{
-                width: "34px",
-                height: "34px",
-                borderRadius: "50%",
+                width: "38px",
+                height: "38px",
+                borderRadius: "12px",
                 background: theme.avatarGradient,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
                 color: "white",
-                fontWeight: "700",
+                fontWeight: "800",
                 fontSize: "13px",
-                flexShrink: 0,
+                boxShadow: `0 4px 10px ${theme.primary}30`,
               }}
             >
-              {user.firstName[0]}
-              {user.lastName[0]}
-            </div>
-            <div style={{ overflow: "hidden" }}>
-              <div
-                style={{
-                  color: "white",
-                  fontSize: "13px",
-                  fontWeight: "600",
-                  whiteSpace: "nowrap",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                }}
-              >
-                {user.firstName} {user.lastName}
-              </div>
-              <div
-                style={{
-                  color: theme.roleLabelColor,
-                  fontSize: "10px",
-                  fontWeight: "600",
-                  textTransform: "uppercase",
-                }}
-              >
-                {config.role}
-              </div>
+              {initials}
             </div>
           </div>
         )}
 
-        <button
+        {/* Sign Out Button */}
+        <motion.button
+          whileHover={{
+            backgroundColor: "rgba(239,68,68,0.1)",
+            color: "#F87171",
+          }}
+          whileTap={{ scale: 0.97 }}
           onClick={() => signOut({ callbackUrl: "/login" })}
           style={{
             width: "100%",
             display: "flex",
             alignItems: "center",
             gap: "10px",
-            padding: "9px 12px",
-            borderRadius: "8px",
+            padding: "10px 12px",
+            borderRadius: "12px",
             background: "transparent",
             border: "none",
-            color: "#6b7280",
+            color: "#6B7280",
             fontSize: "13px",
+            fontWeight: "600",
             cursor: "pointer",
             justifyContent: collapsed ? "center" : "flex-start",
+            transition: "all 0.2s ease",
           }}
         >
-          <LogOut size={16} style={{ flexShrink: 0 }} />
-          {!collapsed && <span>Sign Out</span>}
-        </button>
+          <div
+            style={{
+              width: "34px",
+              height: "34px",
+              borderRadius: "10px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              flexShrink: 0,
+            }}
+          >
+            <LogOut size={17} />
+          </div>
+          <AnimatePresence>
+            {!collapsed && (
+              <motion.span
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+              >
+                Sign Out
+              </motion.span>
+            )}
+          </AnimatePresence>
+        </motion.button>
       </div>
-    </aside>
+    </motion.aside>
   )
 }
