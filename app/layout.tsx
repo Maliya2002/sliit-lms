@@ -15,8 +15,31 @@ export const metadata: Metadata = {
     template: "%s | SLIIT LMS",
   },
   description:
-    "Sri Lanka Institute of Information Technology - Learning Management System",
-  keywords: ["SLIIT", "LMS", "Learning", "Education"],
+    "Sri Lanka Institute of Information Technology - Learning Management System. Manage courses, assignments, quizzes, attendance and grades.",
+  keywords: [
+    "SLIIT",
+    "LMS",
+    "Learning Management System",
+    "Sri Lanka",
+    "Education",
+    "Online Learning",
+    "University",
+  ],
+  authors: [{ name: "SLIIT" }],
+  creator: "SLIIT",
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: process.env.NEXT_PUBLIC_APP_URL,
+    title: "SLIIT LMS",
+    description:
+      "Sri Lanka Institute of Information Technology - Learning Management System",
+    siteName: "SLIIT LMS",
+  },
+  robots: {
+    index: false,
+    follow: false,
+  },
 }
 
 export default function RootLayout({
