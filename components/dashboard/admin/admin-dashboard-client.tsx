@@ -1,5 +1,7 @@
+// components/dashboard/admin/admin-dashboard-client.tsx
 "use client"
 
+import { motion } from "framer-motion"
 import { AdminStats } from "./admin-stats"
 import { RecentUsers } from "./recent-users"
 import { QuickActions } from "./quick-actions"
@@ -15,8 +17,14 @@ interface Props {
 
 export function AdminDashboardClient({ stats }: Props) {
   return (
-    <div style={{ padding: "28px" }}>
-      {/* Stats */}
+    <div
+      style={{
+        padding: "28px 32px",
+        background: "#F8FAFC",
+        minHeight: "calc(100vh - 76px)",
+      }}
+    >
+      {/* Stats Cards */}
       <AdminStats
         totalStudents={stats.totalStudents}
         totalCourses={stats.totalCourses}
@@ -24,16 +32,31 @@ export function AdminDashboardClient({ stats }: Props) {
         systemHealth={stats.systemHealth}
       />
 
-      {/* Bottom Grid */}
+      {/* Main Content Grid */}
       <div
         style={{
           display: "grid",
           gridTemplateColumns: "1.6fr 1fr",
-          gap: "20px",
+          gap: "24px",
         }}
       >
-        <RecentUsers />
-        <QuickActions />
+        {/* Recent Users */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4, duration: 0.5 }}
+        >
+          <RecentUsers />
+        </motion.div>
+
+        {/* Quick Actions */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5, duration: 0.5 }}
+        >
+          <QuickActions />
+        </motion.div>
       </div>
     </div>
   )

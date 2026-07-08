@@ -1,6 +1,9 @@
+// components/dashboard/admin/recent-users.tsx
 "use client"
 
-import { Users, ChevronRight } from "lucide-react"
+import { motion } from "framer-motion"
+import { Users, ChevronRight, ArrowUpRight } from "lucide-react"
+import { useRouter } from "next/navigation"
 
 const DEMO_USERS = [
   {
@@ -10,6 +13,8 @@ const DEMO_USERS = [
     role: "STUDENT",
     status: "ACTIVE",
     joined: "2 mins ago",
+    avatar: "KP",
+    gradient: "linear-gradient(135deg, #0066FF, #6C3AED)",
   },
   {
     id: "2",
@@ -18,6 +23,8 @@ const DEMO_USERS = [
     role: "LECTURER",
     status: "ACTIVE",
     joined: "1 hour ago",
+    avatar: "NS",
+    gradient: "linear-gradient(135deg, #F59E0B, #EF4444)",
   },
   {
     id: "3",
@@ -26,6 +33,8 @@ const DEMO_USERS = [
     role: "STUDENT",
     status: "ACTIVE",
     joined: "3 hours ago",
+    avatar: "SF",
+    gradient: "linear-gradient(135deg, #059669, #0D9488)",
   },
   {
     id: "4",
@@ -34,6 +43,8 @@ const DEMO_USERS = [
     role: "STUDENT",
     status: "PENDING",
     joined: "5 hours ago",
+    avatar: "AJ",
+    gradient: "linear-gradient(135deg, #7C3AED, #EC4899)",
   },
   {
     id: "5",
@@ -42,29 +53,59 @@ const DEMO_USERS = [
     role: "LECTURER",
     status: "ACTIVE",
     joined: "1 day ago",
+    avatar: "PK",
+    gradient: "linear-gradient(135deg, #0891B2, #0D9488)",
   },
 ]
 
-const ROLE_STYLE: Record<string, { bg: string; color: string }> = {
-  STUDENT: { bg: "#eff6ff", color: "#2563eb" },
-  LECTURER: { bg: "#f5f3ff", color: "#7c3aed" },
-  ADMIN: { bg: "#fef2f2", color: "#dc2626" },
+const ROLE_CONFIG: Record<
+  string,
+  { bg: string; color: string; border: string }
+> = {
+  STUDENT: {
+    bg: "#EFF6FF",
+    color: "#0066FF",
+    border: "#BFDBFE",
+  },
+  LECTURER: {
+    bg: "#FFFBEB",
+    color: "#F59E0B",
+    border: "#FDE68A",
+  },
+  ADMIN: {
+    bg: "#FFF1F2",
+    color: "#E11D48",
+    border: "#FECDD3",
+  },
 }
 
-const STATUS_STYLE: Record<string, { bg: string; color: string }> = {
-  ACTIVE: { bg: "#f0fdf4", color: "#16a34a" },
-  PENDING: { bg: "#fffbeb", color: "#d97706" },
-  SUSPENDED: { bg: "#fef2f2", color: "#dc2626" },
+const STATUS_CONFIG: Record<
+  string,
+  { bg: string; color: string; dot: string }
+> = {
+  ACTIVE: { bg: "#ECFDF5", color: "#059669", dot: "#059669" },
+  PENDING: {
+    bg: "#FFFBEB",
+    color: "#F59E0B",
+    dot: "#F59E0B",
+  },
+  SUSPENDED: {
+    bg: "#FFF1F2",
+    color: "#E11D48",
+    dot: "#E11D48",
+  },
 }
 
 export function RecentUsers() {
+  const router = useRouter()
+
   return (
     <div
       style={{
         background: "white",
-        borderRadius: "16px",
-        border: "1px solid #f1f5f9",
-        boxShadow: "0 1px 4px rgba(0,0,0,0.04)",
+        borderRadius: "24px",
+        border: "1px solid #F1F5F9",
+        boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
         overflow: "hidden",
       }}
     >
@@ -72,7 +113,7 @@ export function RecentUsers() {
       <div
         style={{
           padding: "20px 24px",
-          borderBottom: "1px solid #f1f5f9",
+          borderBottom: "1px solid #F8FAFC",
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
@@ -82,28 +123,29 @@ export function RecentUsers() {
           style={{
             display: "flex",
             alignItems: "center",
-            gap: "10px",
+            gap: "12px",
           }}
         >
           <div
             style={{
-              width: "36px",
-              height: "36px",
-              background: "#eff6ff",
-              borderRadius: "10px",
+              width: "38px",
+              height: "38px",
+              borderRadius: "12px",
+              background:
+                "linear-gradient(135deg, #EFF6FF, #DBEAFE)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
             }}
           >
-            <Users size={18} color="#2563eb" />
+            <Users size={18} color="#0066FF" />
           </div>
           <div>
             <h3
               style={{
-                fontSize: "15px",
+                fontSize: "16px",
                 fontWeight: "700",
-                color: "#1e293b",
+                color: "#0F172A",
                 margin: 0,
               }}
             >
@@ -112,7 +154,7 @@ export function RecentUsers() {
             <p
               style={{
                 fontSize: "12px",
-                color: "#94a3b8",
+                color: "#94A3B8",
                 margin: 0,
               }}
             >
@@ -120,21 +162,29 @@ export function RecentUsers() {
             </p>
           </div>
         </div>
-        <a
-          href="/admin/users"
+
+        <motion.button
+          whileHover={{ scale: 1.05, x: 2 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={() => router.push("/admin/users")}
           style={{
-            fontSize: "13px",
-            color: "#2563eb",
-            textDecoration: "none",
-            fontWeight: "600",
             display: "flex",
             alignItems: "center",
-            gap: "4px",
+            gap: "6px",
+            padding: "8px 16px",
+            background:
+              "linear-gradient(135deg, #EFF6FF, #DBEAFE)",
+            color: "#0066FF",
+            border: "none",
+            borderRadius: "10px",
+            fontSize: "13px",
+            fontWeight: "600",
+            cursor: "pointer",
           }}
         >
           View all
           <ChevronRight size={14} />
-        </a>
+        </motion.button>
       </div>
 
       {/* Table */}
@@ -148,21 +198,22 @@ export function RecentUsers() {
           <thead>
             <tr
               style={{
-                background: "#f8fafc",
-                borderBottom: "1px solid #f1f5f9",
+                background: "#F8FAFC",
+                borderBottom: "1px solid #F1F5F9",
               }}
             >
-              {["User", "Email", "Role", "Status", "Joined"].map(
+              {["User", "Role", "Status", "Joined", ""].map(
                 (h) => (
                   <th
                     key={h}
                     style={{
                       padding: "12px 20px",
                       textAlign: "left",
-                      fontSize: "12px",
-                      fontWeight: "600",
-                      color: "#64748b",
-                      whiteSpace: "nowrap",
+                      fontSize: "11px",
+                      fontWeight: "700",
+                      color: "#64748B",
+                      letterSpacing: "0.06em",
+                      textTransform: "uppercase",
                     }}
                   >
                     {h}
@@ -173,76 +224,81 @@ export function RecentUsers() {
           </thead>
           <tbody>
             {DEMO_USERS.map((user, index) => {
-              const roleStyle =
-                ROLE_STYLE[user.role] || ROLE_STYLE.STUDENT
-              const statusStyle =
-                STATUS_STYLE[user.status] ||
-                STATUS_STYLE.ACTIVE
+              const roleConfig =
+                ROLE_CONFIG[user.role] || ROLE_CONFIG.STUDENT
+              const statusConfig =
+                STATUS_CONFIG[user.status] ||
+                STATUS_CONFIG.ACTIVE
 
               return (
-                <tr
+                <motion.tr
                   key={user.id}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{
+                    delay: index * 0.08,
+                    duration: 0.4,
+                  }}
+                  whileHover={{
+                    backgroundColor: "#FAFBFF",
+                  }}
                   style={{
                     borderBottom:
                       index < DEMO_USERS.length - 1
-                        ? "1px solid #f1f5f9"
+                        ? "1px solid #F8FAFC"
                         : "none",
+                    cursor: "pointer",
+                    transition: "background 0.15s ease",
                   }}
                 >
-                  {/* Name */}
+                  {/* User */}
                   <td style={{ padding: "14px 20px" }}>
                     <div
                       style={{
                         display: "flex",
                         alignItems: "center",
-                        gap: "10px",
+                        gap: "12px",
                       }}
                     >
                       <div
                         style={{
-                          width: "34px",
-                          height: "34px",
-                          borderRadius: "50%",
-                          background:
-                            "linear-gradient(135deg,#2563eb,#7c3aed)",
+                          width: "38px",
+                          height: "38px",
+                          borderRadius: "12px",
+                          background: user.gradient,
                           display: "flex",
                           alignItems: "center",
                           justifyContent: "center",
                           color: "white",
                           fontSize: "12px",
-                          fontWeight: "700",
+                          fontWeight: "800",
                           flexShrink: 0,
+                          boxShadow:
+                            "0 4px 10px rgba(0,0,0,0.1)",
                         }}
                       >
-                        {user.name
-                          .split(" ")
-                          .map((n) => n[0])
-                          .join("")
-                          .substring(0, 2)}
+                        {user.avatar}
                       </div>
-                      <span
-                        style={{
-                          fontSize: "14px",
-                          fontWeight: "600",
-                          color: "#1e293b",
-                          whiteSpace: "nowrap",
-                        }}
-                      >
-                        {user.name}
-                      </span>
+                      <div>
+                        <div
+                          style={{
+                            fontSize: "14px",
+                            fontWeight: "700",
+                            color: "#0F172A",
+                          }}
+                        >
+                          {user.name}
+                        </div>
+                        <div
+                          style={{
+                            fontSize: "12px",
+                            color: "#94A3B8",
+                          }}
+                        >
+                          {user.email}
+                        </div>
+                      </div>
                     </div>
-                  </td>
-
-                  {/* Email */}
-                  <td style={{ padding: "14px 20px" }}>
-                    <span
-                      style={{
-                        fontSize: "13px",
-                        color: "#64748b",
-                      }}
-                    >
-                      {user.email}
-                    </span>
                   </td>
 
                   {/* Role */}
@@ -250,10 +306,11 @@ export function RecentUsers() {
                     <span
                       style={{
                         fontSize: "11px",
-                        fontWeight: "600",
-                        background: roleStyle.bg,
-                        color: roleStyle.color,
-                        padding: "4px 10px",
+                        fontWeight: "700",
+                        background: roleConfig.bg,
+                        color: roleConfig.color,
+                        border: `1px solid ${roleConfig.border}`,
+                        padding: "4px 12px",
                         borderRadius: "20px",
                       }}
                     >
@@ -263,18 +320,29 @@ export function RecentUsers() {
 
                   {/* Status */}
                   <td style={{ padding: "14px 20px" }}>
-                    <span
+                    <div
                       style={{
-                        fontSize: "11px",
-                        fontWeight: "600",
-                        background: statusStyle.bg,
-                        color: statusStyle.color,
-                        padding: "4px 10px",
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: "6px",
+                        background: statusConfig.bg,
+                        color: statusConfig.color,
+                        padding: "4px 12px",
                         borderRadius: "20px",
+                        fontSize: "11px",
+                        fontWeight: "700",
                       }}
                     >
+                      <div
+                        style={{
+                          width: "6px",
+                          height: "6px",
+                          borderRadius: "50%",
+                          background: statusConfig.dot,
+                        }}
+                      />
                       {user.status}
-                    </span>
+                    </div>
                   </td>
 
                   {/* Joined */}
@@ -282,13 +350,35 @@ export function RecentUsers() {
                     <span
                       style={{
                         fontSize: "12px",
-                        color: "#94a3b8",
+                        color: "#94A3B8",
+                        fontWeight: "500",
                       }}
                     >
                       {user.joined}
                     </span>
                   </td>
-                </tr>
+
+                  {/* Action */}
+                  <td style={{ padding: "14px 20px" }}>
+                    <motion.button
+                      whileHover={{ scale: 1.1, x: 2 }}
+                      style={{
+                        width: "32px",
+                        height: "32px",
+                        borderRadius: "8px",
+                        background: "#F8FAFC",
+                        border: "1px solid #E2E8F0",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        cursor: "pointer",
+                        color: "#64748B",
+                      }}
+                    >
+                      <ArrowUpRight size={14} />
+                    </motion.button>
+                  </td>
+                </motion.tr>
               )
             })}
           </tbody>
