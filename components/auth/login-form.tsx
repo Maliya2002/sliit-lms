@@ -499,84 +499,84 @@ export function LoginForm() {
         Create an Account
         <ArrowRight size={16} color="#6C3AED" />
       </motion.a>
-
-      {/* Demo Credentials */}
-      <div
+{/* Demo Credentials */}
+<div
+  style={{
+    background: "#F8FAFC",
+    border: "1px solid #E2E8F0",
+    borderRadius: "14px",
+    padding: "14px 16px",
+  }}
+>
+  <p
+    style={{
+      fontSize: "12px",
+      fontWeight: "700",
+      color: "#0F172A",
+      marginBottom: "10px",
+      display: "flex",
+      alignItems: "center",
+      gap: "6px",
+    }}
+  >
+    🧪 Demo Credentials
+  </p>
+  {[
+    {
+      role: "Admin",
+      email: "admin@sliit.lk",
+      pass: "Admin@123",
+      color: "#E11D48",
+    },
+    {
+      role: "Lecturer",
+      email: "silva@sliit.lk",
+      pass: "Lecturer@123",
+      color: "#F59E0B",
+    },
+    {
+      role: "Student",
+      email: "student@sliit.lk",
+      pass: "Student@123",
+      color: "#0066FF",
+    },
+  ].map((cred) => (
+    <div
+      key={cred.role}
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: "6px",
+        fontSize: "11px",
+        color: "#64748B",
+        marginBottom: "6px",
+        flexWrap: "wrap",
+      }}
+    >
+      <span
         style={{
-          background: "#F8FAFC",
-          border: "1px solid #E2E8F0",
-          borderRadius: "14px",
-          padding: "16px 20px",
+          fontSize: "10px",
+          fontWeight: "700",
+          color: cred.color,
+          background: `${cred.color}15`,
+          padding: "2px 8px",
+          borderRadius: "6px",
+          minWidth: "55px",
+          textAlign: "center",
         }}
       >
-        <p
-          style={{
-            fontSize: "12px",
-            fontWeight: "700",
-            color: "#0F172A",
-            marginBottom: "12px",
-            display: "flex",
-            alignItems: "center",
-            gap: "6px",
-          }}
-        >
-          🧪 Demo Credentials
-        </p>
-        {[
-          {
-            role: "Admin",
-            email: "admin@sliit.lk",
-            pass: "Admin@123",
-            color: "#E11D48",
-          },
-          {
-            role: "Lecturer",
-            email: "silva@sliit.lk",
-            pass: "Lecturer@123",
-            color: "#F59E0B",
-          },
-          {
-            role: "Student",
-            email: "student@sliit.lk",
-            pass: "Student@123",
-            color: "#0066FF",
-          },
-        ].map((cred) => (
-          <div
-            key={cred.role}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-              fontSize: "12px",
-              color: "#64748B",
-              marginBottom: "6px",
-            }}
-          >
-            <span
-              style={{
-                fontSize: "11px",
-                fontWeight: "700",
-                color: cred.color,
-                background: `${cred.color}15`,
-                padding: "2px 8px",
-                borderRadius: "6px",
-                minWidth: "60px",
-                textAlign: "center",
-              }}
-            >
-              {cred.role}
-            </span>
-            <span style={{ color: "#475569" }}>
-              {cred.email}
-            </span>
-            <span style={{ color: "#CBD5E1" }}>/</span>
-            <span style={{ color: "#475569" }}>
-              {cred.pass}
-            </span>
-          </div>
-        ))}
-      </div>
+        {cred.role}
+      </span>
+      <span style={{ color: "#475569", fontSize: "11px" }}>
+        {cred.email}
+      </span>
+      <span style={{ color: "#CBD5E1" }}>/</span>
+      <span style={{ color: "#475569", fontSize: "11px" }}>
+        {cred.pass}
+      </span>
+    </div>
+  ))}
+</div>
     </form>
   )
 }

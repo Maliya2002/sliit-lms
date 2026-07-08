@@ -339,12 +339,12 @@ export function AuthWrapper({
           </motion.div>
         </div>
       </div>
-
       {/* ── RIGHT SIDE — Form ── */}
       <motion.div
         initial={{ opacity: 0, x: 50 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.6 }}
+        className="auth-right-side"
         style={{
           flex: 1,
           display: "flex",
@@ -353,20 +353,23 @@ export function AuthWrapper({
           padding: "40px 24px",
           background: "white",
           minHeight: "100vh",
+          overflowY: "auto",
         }}
       >
-        <div style={{ width: "100%", maxWidth: "420px" }}>
+        <div
+          className="auth-form-container"
+          style={{ width: "100%", maxWidth: "420px" }}
+        >
           {/* Mobile Logo */}
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
+            className="mobile-logo"
             style={{
-              display: "flex",
               alignItems: "center",
               gap: "10px",
-              marginBottom: "40px",
+              marginBottom: "32px",
             }}
-            className="mobile-logo"
           >
             <div
               style={{
@@ -416,7 +419,7 @@ export function AuthWrapper({
           >
             <h2
               style={{
-                fontSize: "28px",
+                fontSize: "clamp(22px, 5vw, 28px)",
                 fontWeight: "800",
                 color: "#0F172A",
                 letterSpacing: "-0.02em",
@@ -427,7 +430,7 @@ export function AuthWrapper({
             </h2>
             <p
               style={{
-                fontSize: "15px",
+                fontSize: "14px",
                 color: "#64748B",
                 lineHeight: 1.6,
               }}
@@ -449,12 +452,29 @@ export function AuthWrapper({
 
       {/* Responsive CSS */}
       <style>{`
-        @media (min-width: 1024px) {
-          .auth-left { display: flex !important; }
-          .mobile-logo { display: none !important; }
+        .auth-left {
+          display: none !important;
         }
-        @media (max-width: 1023px) {
-          .mobile-logo { display: flex !important; }
+        .mobile-logo {
+          display: flex !important;
+        }
+
+        @media (min-width: 1024px) {
+          .auth-left {
+            display: flex !important;
+          }
+          .mobile-logo {
+            display: none !important;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .auth-right-side {
+            padding: 20px 16px !important;
+          }
+          .auth-form-container {
+            max-width: 100% !important;
+          }
         }
       `}</style>
     </div>
