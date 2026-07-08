@@ -1,7 +1,14 @@
 // components/quizzes/quiz-results.tsx
 "use client"
 
-import { CheckCircle, XCircle, Trophy } from "lucide-react"
+import { motion } from "framer-motion"
+import {
+  CheckCircle,
+  XCircle,
+  Trophy,
+  ArrowRight,
+  Star,
+} from "lucide-react"
 
 interface QuizResult {
   score: number
@@ -14,7 +21,6 @@ interface QuizResult {
 interface Props {
   quizTitle: string
   result: QuizResult
-  timeTaken?: number
   onClose: () => void
 }
 
@@ -25,64 +31,138 @@ export function QuizResults({
 }: Props) {
   const { score, isPassed, passingScore } = result
 
+  const getMessage = () => {
+    if (score >= 90) return "Outstanding! 🌟"
+    if (score >= 80) return "Excellent Work! 🎉"
+    if (score >= 70) return "Great Job! 👏"
+    if (isPassed) return "Well Done! ✅"
+    return "Keep Practicing! 💪"
+  }
+
+  const stars = score >= 90 ? 3 : score >= 75 ? 2 : isPassed ? 1 : 0
+
   return (
     <div
       style={{
         position: "fixed",
         inset: 0,
-        background: "rgba(0,0,0,0.6)",
+        background: "rgba(0,0,0,0.7)",
         zIndex: 100,
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
         padding: "24px",
+        backdropFilter: "blur(8px)",
       }}
     >
-      <div
+      <motion.div
+        initial={{ opacity: 0, scale: 0.85, y: 30 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        transition={{ type: "spring", stiffness: 200, damping: 20 }}
         style={{
           background: "white",
-          borderRadius: "24px",
+          borderRadius: "28px",
           width: "100%",
           maxWidth: "480px",
-          boxShadow: "0 24px 48px rgba(0,0,0,0.3)",
           overflow: "hidden",
+          boxShadow: "0 40px 80px rgba(0,0,0,0.3)",
         }}
       >
-        {/* Hero Section */}
+        {/* Hero */}
         <div
           style={{
             background: isPassed
-              ? "linear-gradient(135deg, #059669, #047857)"
-              : "linear-gradient(135deg, #dc2626, #b91c1c)",
-            padding: "40px",
+              ? "linear-gradient(135deg, #059669, #0D9488)"
+              : "linear-gradient(135deg, #E11D48, #F59E0B)",
+            padding: "48px 40px 40px",
             textAlign: "center",
-            color: "white",
+            position: "relative",
+            overflow: "hidden",
           }}
         >
-          {/* Icon */}
+          {/* Background pattern */}
           <div
             style={{
-              fontSize: "56px",
-              marginBottom: "16px",
+              position: "absolute",
+              inset: 0,
+              backgroundImage: `
+                radial-gradient(circle at 20% 50%, rgba(255,255,255,0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255,255,255,0.1) 0%, transparent 50%)
+              `,
+            }}
+          />
+
+          {/* Stars */}
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              gap: "8px",
+              marginBottom: "20px",
+              position: "relative",
             }}
           >
-            {isPassed ? "🎉" : "😔"}
+            {[1, 2, 3].map((s) => (
+              <motion.div
+                key={s}
+                initial={{ opacity: 0, scale: 0, rotate: -30 }}
+                animate={{
+                  opacity: s <= stars ? 1 : 0.2,
+                  scale: 1,
+                  rotate: 0,
+                }}
+                transition={{
+                  delay: s * 0.15,
+                  type: "spring",
+                  stiffness: 200,
+                }}
+              >
+                <Star
+                  size={28}
+                  color={s <= stars ? "#FDE68A" : "rgba(255,255,255,0.3)"}
+                  fill={s <= stars ? "#FDE68A" : "transparent"}
+                />
+              </motion.div>
+            ))}
           </div>
 
-          <h2
+          {/* Big Score */}
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{
+              delay: 0.3,
+              type: "spring",
+              stiffness: 150,
+            }}
             style={{
-              fontSize: "24px",
-              fontWeight: "800",
-              margin: "0 0 8px",
+              fontSize: "80px",
+              fontWeight: "900",
+              color: "white",
+              lineHeight: 1,
+              marginBottom: "8px",
+              letterSpacing: "-0.04em",
+              position: "relative",
             }}
           >
-            {isPassed ? "Congratulations!" : "Better Luck Next Time!"}
-          </h2>
+            {score}
+            <span style={{ fontSize: "40px" }}>%</span>
+          </motion.div>
 
           <p
             style={{
-              fontSize: "15px",
-              opacity: 0.85,
+              fontSize: "20px",
+              fontWeight: "700",
+              color: "rgba(255,255,255,0.9)",
+              margin: "0 0 4px",
+            }}
+          >
+            {getMessage()}
+          </p>
+          <p
+            style={{
+              fontSize: "14px",
+              color: "rgba(255,255,255,0.7)",
               margin: 0,
             }}
           >
@@ -90,173 +170,183 @@ export function QuizResults({
           </p>
         </div>
 
-        {/* Score Section */}
-        <div
-          style={{
-            padding: "32px",
-            textAlign: "center",
-          }}
-        >
-          {/* Big Score */}
-          <div
-            style={{
-              fontSize: "72px",
-              fontWeight: "900",
-              color: isPassed ? "#059669" : "#dc2626",
-              lineHeight: 1,
-              marginBottom: "8px",
-            }}
-          >
-            {score}%
+        {/* Body */}
+        <div style={{ padding: "32px 40px 36px" }}>
+          {/* Pass/Fail Badge */}
+          <div style={{ textAlign: "center", marginBottom: "28px" }}>
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "8px",
+                padding: "10px 24px",
+                background: isPassed ? "#ECFDF5" : "#FFF1F2",
+                color: isPassed ? "#059669" : "#E11D48",
+                borderRadius: "20px",
+                fontSize: "16px",
+                fontWeight: "800",
+                border: `1px solid ${isPassed ? "#A7F3D0" : "#FECDD3"}`,
+              }}
+            >
+              {isPassed ? (
+                <CheckCircle size={20} />
+              ) : (
+                <XCircle size={20} />
+              )}
+              {isPassed ? "PASSED" : "FAILED"}
+            </motion.div>
           </div>
 
-          <p
-            style={{
-              fontSize: "16px",
-              color: "#64748b",
-              marginBottom: "24px",
-            }}
-          >
-            You scored {result.totalScore} out of{" "}
-            {result.maxScore} marks
-          </p>
-
-          {/* Status Badge */}
-          <div
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "8px",
-              padding: "10px 24px",
-              background: isPassed ? "#ecfdf5" : "#fef2f2",
-              color: isPassed ? "#059669" : "#dc2626",
-              borderRadius: "20px",
-              fontSize: "15px",
-              fontWeight: "700",
-              marginBottom: "28px",
-            }}
-          >
-            {isPassed ? (
-              <CheckCircle size={18} />
-            ) : (
-              <XCircle size={18} />
-            )}
-            {isPassed ? "PASSED" : "FAILED"}
-          </div>
-
-          {/* Stats Row */}
-          <div
+          {/* Stats Grid */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
             style={{
               display: "grid",
-              gridTemplateColumns: "1fr 1fr",
-              gap: "16px",
+              gridTemplateColumns: "1fr 1fr 1fr",
+              gap: "12px",
               marginBottom: "28px",
             }}
           >
-            <div
-              style={{
-                background: "#f8fafc",
-                borderRadius: "12px",
-                padding: "16px",
-              }}
-            >
+            {[
+              {
+                label: "Your Score",
+                value: `${score}%`,
+                color: isPassed ? "#059669" : "#E11D48",
+                bg: isPassed ? "#ECFDF5" : "#FFF1F2",
+              },
+              {
+                label: "Pass Mark",
+                value: `${passingScore}%`,
+                color: "#7C3AED",
+                bg: "#F5F3FF",
+              },
+              {
+                label: "Points",
+                value: `${result.totalScore}/${result.maxScore}`,
+                color: "#0066FF",
+                bg: "#EFF6FF",
+              },
+            ].map((stat) => (
               <div
+                key={stat.label}
                 style={{
-                  fontSize: "24px",
-                  fontWeight: "800",
-                  color: "#1e293b",
+                  background: stat.bg,
+                  borderRadius: "14px",
+                  padding: "16px",
+                  textAlign: "center",
                 }}
               >
-                {score}%
+                <div
+                  style={{
+                    fontSize: "22px",
+                    fontWeight: "900",
+                    color: stat.color,
+                    letterSpacing: "-0.02em",
+                  }}
+                >
+                  {stat.value}
+                </div>
+                <div
+                  style={{
+                    fontSize: "11px",
+                    color: "#94A3B8",
+                    marginTop: "4px",
+                    fontWeight: "600",
+                  }}
+                >
+                  {stat.label}
+                </div>
               </div>
-              <div
-                style={{
-                  fontSize: "12px",
-                  color: "#94a3b8",
-                }}
-              >
-                Your Score
-              </div>
-            </div>
-            <div
-              style={{
-                background: "#f8fafc",
-                borderRadius: "12px",
-                padding: "16px",
-              }}
-            >
-              <div
-                style={{
-                  fontSize: "24px",
-                  fontWeight: "800",
-                  color: "#1e293b",
-                }}
-              >
-                {passingScore}%
-              </div>
-              <div
-                style={{
-                  fontSize: "12px",
-                  color: "#94a3b8",
-                }}
-              >
-                Passing Score
-              </div>
-            </div>
-          </div>
+            ))}
+          </motion.div>
 
-          {/* Trophy for pass */}
+          {/* Trophy message */}
           {isPassed && (
-            <div
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.6 }}
               style={{
-                background: "#fffbeb",
-                border: "1px solid #fde68a",
-                borderRadius: "12px",
-                padding: "14px",
-                marginBottom: "24px",
+                background:
+                  "linear-gradient(135deg, #FFFBEB, #FEF3C7)",
+                border: "1px solid #FDE68A",
+                borderRadius: "14px",
+                padding: "14px 18px",
                 display: "flex",
                 alignItems: "center",
-                gap: "10px",
-                justifyContent: "center",
+                gap: "12px",
+                marginBottom: "24px",
               }}
             >
-              <Trophy size={20} color="#d97706" />
-              <span
-                style={{
-                  fontSize: "14px",
-                  color: "#92400e",
-                  fontWeight: "600",
-                }}
-              >
-                {score >= 90
-                  ? "Excellent work!"
-                  : score >= 75
-                  ? "Great job!"
-                  : "Well done!"}
-              </span>
-            </div>
+              <Trophy size={22} color="#F59E0B" />
+              <div>
+                <div
+                  style={{
+                    fontSize: "14px",
+                    fontWeight: "700",
+                    color: "#92400E",
+                  }}
+                >
+                  {score >= 90
+                    ? "Perfect Score!"
+                    : score >= 75
+                    ? "Great performance!"
+                    : "Quiz completed successfully!"}
+                </div>
+                <div
+                  style={{
+                    fontSize: "12px",
+                    color: "#B45309",
+                  }}
+                >
+                  Keep up the excellent work!
+                </div>
+              </div>
+            </motion.div>
           )}
 
           {/* Button */}
-          <button
-            type="button"
+          <motion.button
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.7 }}
+            whileHover={{
+              scale: 1.03,
+              boxShadow: isPassed
+                ? "0 8px 24px rgba(5,150,105,0.3)"
+                : "0 8px 24px rgba(0,102,255,0.3)",
+            }}
+            whileTap={{ scale: 0.97 }}
             onClick={onClose}
             style={{
               width: "100%",
-              padding: "14px",
-              background: isPassed ? "#059669" : "#2563eb",
+              padding: "16px",
+              background: isPassed
+                ? "linear-gradient(135deg, #059669, #0D9488)"
+                : "linear-gradient(135deg, #0066FF, #6C3AED)",
               color: "white",
               border: "none",
-              borderRadius: "12px",
-              fontSize: "15px",
-              fontWeight: "600",
+              borderRadius: "16px",
+              fontSize: "16px",
+              fontWeight: "800",
               cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "10px",
+              letterSpacing: "-0.01em",
             }}
           >
             Back to Quizzes
-          </button>
+            <ArrowRight size={18} />
+          </motion.button>
         </div>
-      </div>
+      </motion.div>
     </div>
   )
 }

@@ -1,6 +1,7 @@
 // components/quizzes/quiz-card.tsx
 "use client"
 
+import { motion } from "framer-motion"
 import {
   Clock,
   HelpCircle,
@@ -10,6 +11,8 @@ import {
   MoreHorizontal,
   Edit,
   Trash2,
+  Trophy,
+  XCircle,
 } from "lucide-react"
 import { useState, useRef, useEffect } from "react"
 
@@ -40,27 +43,43 @@ interface Props {
 
 const STATUS_CONFIG: Record<
   string,
-  { color: string; bg: string; dot: string; label: string }
+  {
+    color: string
+    bg: string
+    border: string
+    dot: string
+    label: string
+  }
 > = {
   DRAFT: {
-    color: "#92400e",
-    bg: "#fffbeb",
-    dot: "#d97706",
+    color: "#92400E",
+    bg: "#FFFBEB",
+    border: "#FDE68A",
+    dot: "#F59E0B",
     label: "Draft",
   },
   PUBLISHED: {
-    color: "#065f46",
-    bg: "#ecfdf5",
+    color: "#065F46",
+    bg: "#ECFDF5",
+    border: "#A7F3D0",
     dot: "#059669",
     label: "Published",
   },
   CLOSED: {
-    color: "#1e3a5f",
-    bg: "#eff6ff",
-    dot: "#2563eb",
+    color: "#1E3A5F",
+    bg: "#EFF6FF",
+    border: "#BFDBFE",
+    dot: "#0066FF",
     label: "Closed",
   },
 }
+
+const QUIZ_GRADIENTS = [
+  "linear-gradient(135deg, #7C3AED, #0066FF)",
+  "linear-gradient(135deg, #059669, #0D9488)",
+  "linear-gradient(135deg, #E11D48, #F59E0B)",
+  "linear-gradient(135deg, #0891B2, #7C3AED)",
+]
 
 export function QuizCard({
   quiz,
@@ -90,20 +109,37 @@ export function QuizCard({
     STATUS_CONFIG[quiz.status] || STATUS_CONFIG.DRAFT
   const attempt = quiz.attempts?.[0]
   const hasAttempted = !!attempt?.submittedAt
+  const gradientIndex = quiz.id.charCodeAt(0) % QUIZ_GRADIENTS.length
+  const gradient = QUIZ_GRADIENTS[gradientIndex]
 
   return (
-    <div
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      whileHover={{
+        y: -4,
+        boxShadow: "0 16px 40px rgba(0,0,0,0.08)",
+      }}
       style={{
         background: "white",
-        borderRadius: "16px",
-        border: "1px solid #f1f5f9",
-        boxShadow: "0 1px 4px rgba(0,0,0,0.04)",
-        padding: "20px 24px",
+        borderRadius: "20px",
+        border: "1px solid #F1F5F9",
+        overflow: "hidden",
         marginBottom: "12px",
+        transition: "all 0.25s ease",
       }}
     >
+      {/* Colored Top Bar */}
       <div
         style={{
+          height: "5px",
+          background: gradient,
+        }}
+      />
+
+      <div
+        style={{
+          padding: "20px 24px",
           display: "flex",
           alignItems: "flex-start",
           justifyContent: "space-between",
@@ -122,17 +158,19 @@ export function QuizCard({
           {/* Icon */}
           <div
             style={{
-              width: "48px",
-              height: "48px",
-              borderRadius: "12px",
-              background: "#f5f3ff",
+              width: "52px",
+              height: "52px",
+              borderRadius: "16px",
+              background: gradient,
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
               flexShrink: 0,
+              boxShadow: `0 6px 16px rgba(0,0,0,0.15)`,
+              fontSize: "22px",
             }}
           >
-            <span style={{ fontSize: "24px" }}>📊</span>
+            📊
           </div>
 
           {/* Info */}
@@ -143,39 +181,41 @@ export function QuizCard({
                 display: "flex",
                 alignItems: "center",
                 gap: "10px",
-                marginBottom: "4px",
+                marginBottom: "6px",
                 flexWrap: "wrap",
               }}
             >
               <h3
                 style={{
                   fontSize: "15px",
-                  fontWeight: "700",
-                  color: "#1e293b",
+                  fontWeight: "800",
+                  color: "#0F172A",
                   margin: 0,
+                  letterSpacing: "-0.01em",
                 }}
               >
                 {quiz.title}
               </h3>
 
-              {/* Status Badge */}
+              {/* Status */}
               <span
                 style={{
+                  fontSize: "10px",
+                  fontWeight: "700",
+                  background: statusConfig.bg,
+                  color: statusConfig.color,
+                  border: `1px solid ${statusConfig.border}`,
+                  padding: "3px 10px",
+                  borderRadius: "20px",
                   display: "inline-flex",
                   alignItems: "center",
                   gap: "5px",
-                  fontSize: "11px",
-                  fontWeight: "600",
-                  background: statusConfig.bg,
-                  color: statusConfig.color,
-                  padding: "3px 8px",
-                  borderRadius: "20px",
                 }}
               >
                 <span
                   style={{
-                    width: "6px",
-                    height: "6px",
+                    width: "5px",
+                    height: "5px",
                     borderRadius: "50%",
                     background: statusConfig.dot,
                   }}
@@ -183,24 +223,32 @@ export function QuizCard({
                 {statusConfig.label}
               </span>
 
-              {/* Score Badge for Student */}
+              {/* Score badge for student */}
               {role === "STUDENT" && hasAttempted && (
                 <span
                   style={{
                     fontSize: "11px",
-                    fontWeight: "600",
+                    fontWeight: "700",
                     background: attempt?.isPassed
-                      ? "#ecfdf5"
-                      : "#fef2f2",
+                      ? "#ECFDF5"
+                      : "#FFF1F2",
                     color: attempt?.isPassed
                       ? "#059669"
-                      : "#dc2626",
-                    padding: "3px 8px",
+                      : "#E11D48",
+                    padding: "3px 10px",
                     borderRadius: "20px",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "4px",
                   }}
                 >
-                  {attempt?.isPassed ? "✅ Passed" : "❌ Failed"}{" "}
-                  {attempt?.score}%
+                  {attempt?.isPassed ? (
+                    <Trophy size={11} />
+                  ) : (
+                    <XCircle size={11} />
+                  )}
+                  {attempt?.score}%{" "}
+                  {attempt?.isPassed ? "Passed" : "Failed"}
                 </span>
               )}
             </div>
@@ -209,19 +257,20 @@ export function QuizCard({
             <p
               style={{
                 fontSize: "12px",
-                color: "#64748b",
-                margin: "0 0 10px",
+                color: "#64748B",
+                margin: "0 0 12px",
+                fontWeight: "500",
               }}
             >
               📚 {quiz.course.code} — {quiz.course.title}
             </p>
 
-            {/* Meta */}
+            {/* Meta Pills */}
             <div
               style={{
                 display: "flex",
                 alignItems: "center",
-                gap: "16px",
+                gap: "8px",
                 flexWrap: "wrap",
               }}
             >
@@ -231,10 +280,15 @@ export function QuizCard({
                   alignItems: "center",
                   gap: "5px",
                   fontSize: "12px",
-                  color: "#64748b",
+                  color: "#64748B",
+                  background: "#F8FAFC",
+                  padding: "4px 10px",
+                  borderRadius: "20px",
+                  fontWeight: "500",
+                  border: "1px solid #F1F5F9",
                 }}
               >
-                <Clock size={13} />
+                <Clock size={12} />
                 {quiz.duration} mins
               </div>
 
@@ -244,10 +298,15 @@ export function QuizCard({
                   alignItems: "center",
                   gap: "5px",
                   fontSize: "12px",
-                  color: "#64748b",
+                  color: "#64748B",
+                  background: "#F8FAFC",
+                  padding: "4px 10px",
+                  borderRadius: "20px",
+                  fontWeight: "500",
+                  border: "1px solid #F1F5F9",
                 }}
               >
-                <HelpCircle size={13} />
+                <HelpCircle size={12} />
                 {quiz._count.questions} questions
               </div>
 
@@ -257,10 +316,15 @@ export function QuizCard({
                   alignItems: "center",
                   gap: "5px",
                   fontSize: "12px",
-                  color: "#64748b",
+                  color: "#7C3AED",
+                  background: "#F5F3FF",
+                  padding: "4px 10px",
+                  borderRadius: "20px",
+                  fontWeight: "700",
+                  border: "1px solid #EDE9FE",
                 }}
               >
-                <Target size={13} />
+                <Target size={12} />
                 Pass: {quiz.passingScore}%
               </div>
 
@@ -268,8 +332,16 @@ export function QuizCard({
                 quiz._count.attempts !== undefined && (
                   <div
                     style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "5px",
                       fontSize: "12px",
-                      color: "#64748b",
+                      color: "#0066FF",
+                      background: "#EFF6FF",
+                      padding: "4px 10px",
+                      borderRadius: "20px",
+                      fontWeight: "700",
+                      border: "1px solid #BFDBFE",
                     }}
                   >
                     👥 {quiz._count.attempts} attempts
@@ -288,28 +360,32 @@ export function QuizCard({
             flexShrink: 0,
           }}
         >
-          {/* Student Start/View */}
+          {/* Student Start Button */}
           {role === "STUDENT" &&
             quiz.status === "PUBLISHED" && (
-              <button
-                type="button"
-                onClick={() => onStart?.(quiz)}
+              <motion.button
+                whileHover={{
+                  scale: 1.05,
+                  boxShadow: hasAttempted
+                    ? "none"
+                    : "0 8px 20px rgba(124,58,237,0.3)",
+                }}
+                whileTap={{ scale: 0.97 }}
+                onClick={() => !hasAttempted && onStart?.(quiz)}
                 disabled={hasAttempted}
                 style={{
                   display: "flex",
                   alignItems: "center",
-                  gap: "6px",
-                  padding: "8px 16px",
+                  gap: "7px",
+                  padding: "10px 18px",
                   background: hasAttempted
-                    ? "#f1f5f9"
-                    : "#7c3aed",
-                  color: hasAttempted
-                    ? "#64748b"
-                    : "white",
+                    ? "#F1F5F9"
+                    : gradient,
+                  color: hasAttempted ? "#94A3B8" : "white",
                   border: "none",
-                  borderRadius: "8px",
+                  borderRadius: "12px",
                   fontSize: "13px",
-                  fontWeight: "600",
+                  fontWeight: "700",
                   cursor: hasAttempted
                     ? "not-allowed"
                     : "pointer",
@@ -326,47 +402,54 @@ export function QuizCard({
                     Start Quiz
                   </>
                 )}
-              </button>
+              </motion.button>
             )}
 
-          {/* Lecturer Actions */}
+          {/* Lecturer Actions Menu */}
           {role !== "STUDENT" && (
             <div
               ref={menuRef}
               style={{ position: "relative" }}
             >
-              <button
-                type="button"
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
                 onClick={() => setMenuOpen(!menuOpen)}
                 style={{
-                  width: "32px",
-                  height: "32px",
-                  borderRadius: "8px",
-                  background: "#f8fafc",
-                  border: "1px solid #e2e8f0",
+                  width: "36px",
+                  height: "36px",
+                  borderRadius: "10px",
+                  background: "#F8FAFC",
+                  border: "1.5px solid #E2E8F0",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
                   cursor: "pointer",
-                  color: "#64748b",
+                  color: "#64748B",
                 }}
               >
                 <MoreHorizontal size={16} />
-              </button>
+              </motion.button>
 
               {menuOpen && (
-                <div
+                <motion.div
+                  initial={{
+                    opacity: 0,
+                    scale: 0.95,
+                    y: -5,
+                  }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
                   style={{
                     position: "absolute",
                     right: 0,
-                    top: "36px",
+                    top: "42px",
                     background: "white",
-                    border: "1px solid #e2e8f0",
-                    borderRadius: "12px",
+                    border: "1px solid #E2E8F0",
+                    borderRadius: "14px",
                     boxShadow:
-                      "0 8px 24px rgba(0,0,0,0.12)",
+                      "0 10px 30px rgba(0,0,0,0.12)",
                     zIndex: 50,
-                    minWidth: "140px",
+                    minWidth: "150px",
                     padding: "6px",
                   }}
                 >
@@ -374,7 +457,7 @@ export function QuizCard({
                     {
                       label: "Edit",
                       icon: <Edit size={14} />,
-                      color: "#2563eb",
+                      color: "#0066FF",
                       action: () => {
                         onEdit?.(quiz)
                         setMenuOpen(false)
@@ -383,12 +466,10 @@ export function QuizCard({
                     {
                       label: "Delete",
                       icon: <Trash2 size={14} />,
-                      color: "#dc2626",
+                      color: "#E11D48",
                       action: () => {
                         if (
-                          confirm(
-                            `Delete "${quiz.title}"?`
-                          )
+                          confirm(`Delete "${quiz.title}"?`)
                         ) {
                           onDelete?.(quiz.id)
                         }
@@ -396,35 +477,42 @@ export function QuizCard({
                       },
                     },
                   ].map((item) => (
-                    <button
+                    <motion.button
                       key={item.label}
-                      type="button"
+                      whileHover={{
+                        backgroundColor:
+                          item.color === "#0066FF"
+                            ? "#EFF6FF"
+                            : "#FFF1F2",
+                      }}
                       onClick={item.action}
                       style={{
                         width: "100%",
                         display: "flex",
                         alignItems: "center",
                         gap: "10px",
-                        padding: "9px 12px",
+                        padding: "10px 12px",
                         background: "transparent",
                         border: "none",
-                        borderRadius: "8px",
+                        borderRadius: "10px",
                         fontSize: "13px",
                         color: item.color,
+                        fontWeight: "600",
                         cursor: "pointer",
                         textAlign: "left",
+                        transition: "background 0.15s",
                       }}
                     >
                       {item.icon}
                       {item.label}
-                    </button>
+                    </motion.button>
                   ))}
-                </div>
+                </motion.div>
               )}
             </div>
           )}
         </div>
       </div>
-    </div>
+    </motion.div>
   )
 }
