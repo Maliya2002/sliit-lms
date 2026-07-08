@@ -1,8 +1,8 @@
 // components/assignments/assignment-card.tsx
 "use client"
 
+import { motion } from "framer-motion"
 import {
-  Calendar,
   FileText,
   Users,
   CheckCircle,
@@ -12,6 +12,7 @@ import {
   Trash2,
   Eye,
   Send,
+  Clock,
 } from "lucide-react"
 import { useState, useRef, useEffect } from "react"
 
@@ -23,10 +24,7 @@ interface Assignment {
   maxMarks: number
   status: string
   allowLate: boolean
-  course: {
-    title: string
-    code: string
-  }
+  course: { title: string; code: string }
   _count?: { submissions: number }
   submissions?: Array<{
     id: string
@@ -47,43 +45,59 @@ interface Props {
 
 const STATUS_CONFIG: Record<
   string,
-  { color: string; bg: string; label: string }
+  {
+    color: string
+    bg: string
+    border: string
+    dot: string
+    label: string
+  }
 > = {
-  DRAFT: { color: "#92400e", bg: "#fffbeb", label: "Draft" },
+  DRAFT: {
+    color: "#92400E",
+    bg: "#FFFBEB",
+    border: "#FDE68A",
+    dot: "#F59E0B",
+    label: "Draft",
+  },
   PUBLISHED: {
-    color: "#065f46",
-    bg: "#ecfdf5",
+    color: "#065F46",
+    bg: "#ECFDF5",
+    border: "#A7F3D0",
+    dot: "#059669",
     label: "Published",
   },
   CLOSED: {
-    color: "#1e3a5f",
-    bg: "#eff6ff",
+    color: "#1E3A5F",
+    bg: "#EFF6FF",
+    border: "#BFDBFE",
+    dot: "#0066FF",
     label: "Closed",
   },
 }
 
-const SUB_STATUS_CONFIG: Record<
+const SUB_STATUS: Record<
   string,
   { color: string; bg: string; label: string }
 > = {
   SUBMITTED: {
-    color: "#065f46",
-    bg: "#ecfdf5",
+    color: "#065F46",
+    bg: "#ECFDF5",
     label: "Submitted",
   },
   LATE: {
-    color: "#92400e",
-    bg: "#fffbeb",
+    color: "#92400E",
+    bg: "#FFFBEB",
     label: "Late",
   },
   GRADED: {
-    color: "#1e3a5f",
-    bg: "#eff6ff",
+    color: "#1E3A5F",
+    bg: "#EFF6FF",
     label: "Graded",
   },
   RESUBMITTED: {
-    color: "#5b21b6",
-    bg: "#f5f3ff",
+    color: "#5B21B6",
+    bg: "#F5F3FF",
     label: "Resubmitted",
   },
 }
@@ -99,13 +113,11 @@ function formatDueDate(dateStr: string) {
   if (hours < 24)
     return { text: `Due in ${hours}h`, urgent: true }
   if (days < 3)
-    return { text: `Due in ${days}d`, urgent: true }
-
+    return { text: `Due in ${days}d`, urgent: false }
   return {
     text: date.toLocaleDateString("en-US", {
       month: "short",
       day: "numeric",
-      year: "numeric",
     }),
     urgent: false,
   }
@@ -142,19 +154,27 @@ export function AssignmentCard({
     STATUS_CONFIG[assignment.status] || STATUS_CONFIG.DRAFT
 
   return (
-    <div
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      whileHover={{
+        y: -3,
+        boxShadow: dueInfo.urgent
+          ? "0 12px 30px rgba(225,29,72,0.1)"
+          : "0 12px 30px rgba(0,0,0,0.06)",
+      }}
       style={{
         background: "white",
-        borderRadius: "16px",
+        borderRadius: "20px",
         border: `1px solid ${
           dueInfo.urgent && !submission
-            ? "#fecaca"
-            : "#f1f5f9"
+            ? "#FECDD3"
+            : "#F1F5F9"
         }`,
-        boxShadow: "0 1px 4px rgba(0,0,0,0.04)",
         padding: "20px 24px",
         marginBottom: "12px",
-        transition: "box-shadow 0.2s",
+        transition: "all 0.25s ease",
+        cursor: "default",
       }}
     >
       <div
@@ -165,7 +185,7 @@ export function AssignmentCard({
           gap: "16px",
         }}
       >
-        {/* Left: Icon + Info */}
+        {/* Left */}
         <div
           style={{
             display: "flex",
@@ -177,21 +197,26 @@ export function AssignmentCard({
           {/* Icon */}
           <div
             style={{
-              width: "48px",
-              height: "48px",
-              borderRadius: "12px",
+              width: "52px",
+              height: "52px",
+              borderRadius: "16px",
               background: dueInfo.urgent
-                ? "#fef2f2"
-                : "#eff6ff",
+                ? "linear-gradient(135deg, #FFF1F2, #FFE4E6)"
+                : "linear-gradient(135deg, #EFF6FF, #DBEAFE)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
               flexShrink: 0,
+              boxShadow: dueInfo.urgent
+                ? "0 4px 12px rgba(225,29,72,0.15)"
+                : "0 4px 12px rgba(0,102,255,0.1)",
             }}
           >
             <FileText
               size={22}
-              color={dueInfo.urgent ? "#dc2626" : "#2563eb"}
+              color={
+                dueInfo.urgent ? "#E11D48" : "#0066FF"
+              }
             />
           </div>
 
@@ -203,56 +228,69 @@ export function AssignmentCard({
                 display: "flex",
                 alignItems: "center",
                 gap: "10px",
-                marginBottom: "4px",
+                marginBottom: "6px",
                 flexWrap: "wrap",
               }}
             >
               <h3
                 style={{
                   fontSize: "15px",
-                  fontWeight: "700",
-                  color: "#1e293b",
+                  fontWeight: "800",
+                  color: "#0F172A",
                   margin: 0,
+                  letterSpacing: "-0.01em",
                 }}
               >
                 {assignment.title}
               </h3>
 
-              {/* Status Badge (Lecturer) */}
+              {/* Lecturer Status */}
               {role !== "STUDENT" && (
                 <span
                   style={{
-                    fontSize: "11px",
-                    fontWeight: "600",
+                    fontSize: "10px",
+                    fontWeight: "700",
                     background: statusConfig.bg,
                     color: statusConfig.color,
-                    padding: "3px 8px",
+                    border: `1px solid ${statusConfig.border}`,
+                    padding: "3px 10px",
                     borderRadius: "20px",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "5px",
                   }}
                 >
+                  <span
+                    style={{
+                      width: "5px",
+                      height: "5px",
+                      borderRadius: "50%",
+                      background: statusConfig.dot,
+                    }}
+                  />
                   {statusConfig.label}
                 </span>
               )}
 
-              {/* Submission Status (Student) */}
+              {/* Student Submission Status */}
               {role === "STUDENT" && submission && (
                 <span
                   style={{
-                    fontSize: "11px",
-                    fontWeight: "600",
+                    fontSize: "10px",
+                    fontWeight: "700",
                     background:
-                      SUB_STATUS_CONFIG[submission.status]
-                        ?.bg || "#f8fafc",
+                      SUB_STATUS[submission.status]?.bg ||
+                      "#F8FAFC",
                     color:
-                      SUB_STATUS_CONFIG[submission.status]
-                        ?.color || "#64748b",
-                    padding: "3px 8px",
+                      SUB_STATUS[submission.status]
+                        ?.color || "#64748B",
+                    padding: "3px 10px",
                     borderRadius: "20px",
                   }}
                 >
                   ✅{" "}
-                  {SUB_STATUS_CONFIG[submission.status]
-                    ?.label || submission.status}
+                  {SUB_STATUS[submission.status]?.label ||
+                    submission.status}
                 </span>
               )}
             </div>
@@ -261,20 +299,21 @@ export function AssignmentCard({
             <p
               style={{
                 fontSize: "12px",
-                color: "#64748b",
+                color: "#64748B",
                 margin: "0 0 10px",
+                fontWeight: "500",
               }}
             >
               📚 {assignment.course.code} —{" "}
               {assignment.course.title}
             </p>
 
-            {/* Meta Row */}
+            {/* Meta */}
             <div
               style={{
                 display: "flex",
                 alignItems: "center",
-                gap: "16px",
+                gap: "14px",
                 flexWrap: "wrap",
               }}
             >
@@ -286,62 +325,74 @@ export function AssignmentCard({
                   gap: "5px",
                   fontSize: "12px",
                   color: dueInfo.urgent
-                    ? "#dc2626"
-                    : "#64748b",
-                  fontWeight: dueInfo.urgent ? "600" : "400",
+                    ? "#E11D48"
+                    : "#64748B",
+                  fontWeight: dueInfo.urgent
+                    ? "700"
+                    : "500",
+                  background: dueInfo.urgent
+                    ? "#FFF1F2"
+                    : "#F8FAFC",
+                  padding: "4px 10px",
+                  borderRadius: "20px",
                 }}
               >
                 {dueInfo.urgent ? (
-                  <AlertCircle size={13} />
+                  <AlertCircle size={12} />
                 ) : (
-                  <Calendar size={13} />
+                  <Clock size={12} />
                 )}
                 {dueInfo.text}
               </div>
 
-              {/* Max Marks */}
+              {/* Marks */}
               <div
                 style={{
                   display: "flex",
                   alignItems: "center",
-                  gap: "5px",
+                  gap: "4px",
                   fontSize: "12px",
-                  color: "#64748b",
+                  color: "#64748B",
+                  fontWeight: "500",
                 }}
               >
-                <CheckCircle size={13} />
+                <CheckCircle size={12} color="#059669" />
                 {assignment.maxMarks} marks
               </div>
 
-              {/* Submissions Count (Lecturer) */}
+              {/* Submissions for lecturer */}
               {role !== "STUDENT" &&
                 assignment._count !== undefined && (
                   <div
                     style={{
                       display: "flex",
                       alignItems: "center",
-                      gap: "5px",
+                      gap: "4px",
                       fontSize: "12px",
-                      color: "#64748b",
+                      color: "#0066FF",
+                      fontWeight: "600",
+                      background: "#EFF6FF",
+                      padding: "4px 10px",
+                      borderRadius: "20px",
                     }}
                   >
-                    <Users size={13} />
+                    <Users size={12} />
                     {assignment._count.submissions} submitted
                   </div>
                 )}
 
-              {/* Student Grade */}
+              {/* Student grade */}
               {role === "STUDENT" &&
                 submission?.marks !== null &&
                 submission?.marks !== undefined && (
                   <div
                     style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "5px",
                       fontSize: "12px",
+                      fontWeight: "700",
                       color: "#059669",
-                      fontWeight: "600",
+                      background: "#ECFDF5",
+                      padding: "4px 10px",
+                      borderRadius: "20px",
                     }}
                   >
                     🎯 {submission.marks}/
@@ -349,15 +400,17 @@ export function AssignmentCard({
                   </div>
                 )}
 
-              {/* Late allowed */}
+              {/* Late OK badge */}
               {assignment.allowLate && (
                 <div
                   style={{
-                    fontSize: "11px",
-                    color: "#d97706",
-                    background: "#fffbeb",
-                    padding: "2px 8px",
-                    borderRadius: "10px",
+                    fontSize: "10px",
+                    color: "#F59E0B",
+                    fontWeight: "700",
+                    background: "#FFFBEB",
+                    padding: "3px 8px",
+                    borderRadius: "20px",
+                    border: "1px solid #FDE68A",
                   }}
                 >
                   Late OK
@@ -376,56 +429,62 @@ export function AssignmentCard({
             flexShrink: 0,
           }}
         >
-          {/* Student Submit Button */}
+          {/* Student Submit */}
           {role === "STUDENT" &&
             assignment.status === "PUBLISHED" &&
             !submission && (
-              <button
-                type="button"
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.97 }}
                 onClick={() => onSubmit?.(assignment.id)}
                 style={{
                   display: "flex",
                   alignItems: "center",
                   gap: "6px",
-                  padding: "8px 16px",
+                  padding: "9px 18px",
                   background: dueInfo.urgent
-                    ? "#dc2626"
-                    : "#2563eb",
+                    ? "linear-gradient(135deg, #E11D48, #F59E0B)"
+                    : "linear-gradient(135deg, #0066FF, #6C3AED)",
                   color: "white",
                   border: "none",
-                  borderRadius: "8px",
+                  borderRadius: "10px",
                   fontSize: "13px",
-                  fontWeight: "600",
+                  fontWeight: "700",
                   cursor: "pointer",
+                  boxShadow: dueInfo.urgent
+                    ? "0 4px 14px rgba(225,29,72,0.3)"
+                    : "0 4px 14px rgba(0,102,255,0.3)",
                 }}
               >
                 <Send size={14} />
                 Submit
-              </button>
+              </motion.button>
             )}
 
           {/* Lecturer View Submissions */}
           {role !== "STUDENT" && (
-            <button
-              type="button"
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.97 }}
               onClick={() => onView?.(assignment.id)}
               style={{
                 display: "flex",
                 alignItems: "center",
                 gap: "6px",
-                padding: "8px 16px",
-                background: "#eff6ff",
-                color: "#2563eb",
+                padding: "9px 18px",
+                background:
+                  "linear-gradient(135deg, #EFF6FF, #DBEAFE)",
+                color: "#0066FF",
                 border: "none",
-                borderRadius: "8px",
+                borderRadius: "10px",
                 fontSize: "13px",
-                fontWeight: "600",
+                fontWeight: "700",
                 cursor: "pointer",
               }}
             >
               <Eye size={14} />
               Submissions
-            </button>
+            </motion.button>
           )}
 
           {/* Actions Menu */}
@@ -434,46 +493,52 @@ export function AssignmentCard({
               ref={menuRef}
               style={{ position: "relative" }}
             >
-              <button
-                type="button"
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
                 onClick={() => setMenuOpen(!menuOpen)}
                 style={{
-                  width: "32px",
-                  height: "32px",
-                  borderRadius: "8px",
-                  background: "#f8fafc",
-                  border: "1px solid #e2e8f0",
+                  width: "36px",
+                  height: "36px",
+                  borderRadius: "10px",
+                  background: "#F8FAFC",
+                  border: "1.5px solid #E2E8F0",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
                   cursor: "pointer",
-                  color: "#64748b",
+                  color: "#64748B",
                 }}
               >
                 <MoreHorizontal size={16} />
-              </button>
+              </motion.button>
 
               {menuOpen && (
-                <div
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95, y: -5 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95, y: -5 }}
                   style={{
                     position: "absolute",
                     right: 0,
-                    top: "36px",
+                    top: "40px",
                     background: "white",
-                    border: "1px solid #e2e8f0",
-                    borderRadius: "12px",
+                    border: "1px solid #E2E8F0",
+                    borderRadius: "14px",
                     boxShadow:
-                      "0 8px 24px rgba(0,0,0,0.12)",
+                      "0 10px 30px rgba(0,0,0,0.12)",
                     zIndex: 50,
-                    minWidth: "140px",
+                    minWidth: "150px",
                     padding: "6px",
+                    overflow: "hidden",
                   }}
                 >
                   {[
                     {
                       label: "Edit",
                       icon: <Edit size={14} />,
-                      color: "#2563eb",
+                      color: "#0066FF",
+                      bg: "#EFF6FF",
                       action: () => {
                         onEdit?.(assignment)
                         setMenuOpen(false)
@@ -482,7 +547,8 @@ export function AssignmentCard({
                     {
                       label: "Delete",
                       icon: <Trash2 size={14} />,
-                      color: "#dc2626",
+                      color: "#E11D48",
+                      bg: "#FFF1F2",
                       action: () => {
                         if (
                           confirm(
@@ -495,35 +561,39 @@ export function AssignmentCard({
                       },
                     },
                   ].map((item) => (
-                    <button
+                    <motion.button
                       key={item.label}
-                      type="button"
+                      whileHover={{
+                        backgroundColor: item.bg,
+                      }}
                       onClick={item.action}
                       style={{
                         width: "100%",
                         display: "flex",
                         alignItems: "center",
                         gap: "10px",
-                        padding: "9px 12px",
+                        padding: "10px 12px",
                         background: "transparent",
                         border: "none",
-                        borderRadius: "8px",
+                        borderRadius: "10px",
                         fontSize: "13px",
                         color: item.color,
+                        fontWeight: "600",
                         cursor: "pointer",
                         textAlign: "left",
+                        transition: "background 0.15s ease",
                       }}
                     >
                       {item.icon}
                       {item.label}
-                    </button>
+                    </motion.button>
                   ))}
-                </div>
+                </motion.div>
               )}
             </div>
           )}
         </div>
       </div>
-    </div>
+    </motion.div>
   )
 }

@@ -6,30 +6,40 @@ interface Props {
 
 const STATUS_CONFIG: Record<
   string,
-  { label: string; color: string; bg: string; dot: string }
+  {
+    label: string
+    color: string
+    bg: string
+    border: string
+    dot: string
+  }
 > = {
   DRAFT: {
     label: "Draft",
-    color: "#92400e",
-    bg: "#fffbeb",
-    dot: "#d97706",
+    color: "#92400E",
+    bg: "#FFFBEB",
+    border: "#FDE68A",
+    dot: "#F59E0B",
   },
   PUBLISHED: {
     label: "Published",
-    color: "#065f46",
-    bg: "#ecfdf5",
+    color: "#065F46",
+    bg: "#ECFDF5",
+    border: "#A7F3D0",
     dot: "#059669",
   },
   ARCHIVED: {
     label: "Archived",
-    color: "#1e3a5f",
-    bg: "#eff6ff",
-    dot: "#2563eb",
+    color: "#1E3A5F",
+    bg: "#EFF6FF",
+    border: "#BFDBFE",
+    dot: "#0066FF",
   },
 }
 
 export function CourseStatusBadge({ status }: Props) {
-  const config = STATUS_CONFIG[status] || STATUS_CONFIG.DRAFT
+  const config =
+    STATUS_CONFIG[status] || STATUS_CONFIG.DRAFT
 
   return (
     <span
@@ -38,11 +48,13 @@ export function CourseStatusBadge({ status }: Props) {
         alignItems: "center",
         gap: "6px",
         fontSize: "11px",
-        fontWeight: "600",
+        fontWeight: "700",
         background: config.bg,
         color: config.color,
+        border: `1px solid ${config.border}`,
         padding: "4px 10px",
         borderRadius: "20px",
+        letterSpacing: "0.02em",
       }}
     >
       <span

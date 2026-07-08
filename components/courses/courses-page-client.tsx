@@ -3,6 +3,7 @@
 
 import { useState, useEffect, useCallback } from "react"
 import { useRouter } from "next/navigation"
+import { motion, AnimatePresence } from "framer-motion"
 import {
   BookOpen,
   Plus,
@@ -10,14 +11,12 @@ import {
   Grid,
   List,
   Filter,
+  TrendingUp,
+  Users,
 } from "lucide-react"
-import { CourseCard } from "./course-card"
 import { CourseForm } from "./course-form"
 import { CourseStatusBadge } from "./course-status-badge"
 
-// ─────────────────────────────────────────
-// Types
-// ─────────────────────────────────────────
 interface Course {
   id: string
   title: string
@@ -34,19 +33,22 @@ interface Course {
       lastName: string
     } | null
   }
-  department: {
-    name: string
-  } | null
+  department: { name: string } | null
 }
 
 type ViewMode = "grid" | "list"
 
-// ─────────────────────────────────────────
-// Component
-// ─────────────────────────────────────────
+const COURSE_GRADIENTS = [
+  "linear-gradient(135deg, #0066FF, #6C3AED)",
+  "linear-gradient(135deg, #7C3AED, #EC4899)",
+  "linear-gradient(135deg, #059669, #0D9488)",
+  "linear-gradient(135deg, #F59E0B, #EF4444)",
+  "linear-gradient(135deg, #0891B2, #6C3AED)",
+  "linear-gradient(135deg, #E11D48, #F59E0B)",
+]
+
 export function CoursesPageClient() {
   const router = useRouter()
-
   const [courses, setCourses] = useState<Course[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [search, setSearch] = useState("")
@@ -56,9 +58,6 @@ export function CoursesPageClient() {
   const [editingCourse, setEditingCourse] =
     useState<Course | null>(null)
 
-  // ─────────────────────────────────────────
-  // Fetch Courses
-  // ─────────────────────────────────────────
   const fetchCourses = useCallback(async () => {
     try {
       setIsLoading(true)
@@ -70,20 +69,17 @@ export function CoursesPageClient() {
       const data = await res.json()
       if (res.ok) setCourses(data.courses)
     } catch (error) {
-      console.error("Fetch courses error:", error)
+      console.error(error)
     } finally {
       setIsLoading(false)
     }
   }, [search, statusFilter])
 
   useEffect(() => {
-    const timer = setTimeout(fetchCourses, 300)
-    return () => clearTimeout(timer)
+    const t = setTimeout(fetchCourses, 300)
+    return () => clearTimeout(t)
   }, [fetchCourses])
 
-  // ─────────────────────────────────────────
-  // Handlers
-  // ─────────────────────────────────────────
   const handleDelete = async (id: string) => {
     try {
       const res = await fetch(`/api/courses/${id}`, {
@@ -91,137 +87,158 @@ export function CoursesPageClient() {
       })
       if (res.ok) fetchCourses()
     } catch (error) {
-      console.error("Delete error:", error)
+      console.error(error)
     }
   }
 
-  const handleEdit = (course: Course) => {
-    setEditingCourse(course)
-    setShowForm(true)
-  }
-
-  const handleView = (id: string) => {
-    router.push(`/admin/courses/${id}`)
-  }
-
-  // ─────────────────────────────────────────
-  // Stats
-  // ─────────────────────────────────────────
   const statusCounts = {
     all: courses.length,
-    DRAFT: courses.filter((c) => c.status === "DRAFT").length,
-    PUBLISHED: courses.filter((c) => c.status === "PUBLISHED")
+    PUBLISHED: courses.filter(
+      (c) => c.status === "PUBLISHED"
+    ).length,
+    DRAFT: courses.filter((c) => c.status === "DRAFT")
       .length,
-    ARCHIVED: courses.filter((c) => c.status === "ARCHIVED")
-      .length,
+    ARCHIVED: courses.filter(
+      (c) => c.status === "ARCHIVED"
+    ).length,
   }
 
-  // ─────────────────────────────────────────
-  // Render
-  // ─────────────────────────────────────────
   return (
-    <div style={{ padding: "28px" }}>
-
+    <div
+      style={{
+        padding: "28px 32px",
+        background: "#F8FAFC",
+        minHeight: "calc(100vh - 76px)",
+      }}
+    >
       {/* Stats Row */}
       <div
         style={{
           display: "grid",
           gridTemplateColumns: "repeat(4, 1fr)",
           gap: "16px",
-          marginBottom: "24px",
+          marginBottom: "28px",
         }}
       >
         {[
           {
             label: "Total Courses",
             value: statusCounts.all,
-            color: "#2563eb",
-            bg: "#eff6ff",
+            icon: BookOpen,
+            color: "#0066FF",
+            gradient:
+              "linear-gradient(135deg, #0066FF, #6C3AED)",
+            bg: "linear-gradient(135deg, #EFF6FF, #DBEAFE)",
           },
           {
             label: "Published",
             value: statusCounts.PUBLISHED,
+            icon: TrendingUp,
             color: "#059669",
-            bg: "#ecfdf5",
+            gradient:
+              "linear-gradient(135deg, #059669, #0D9488)",
+            bg: "linear-gradient(135deg, #ECFDF5, #D1FAE5)",
           },
           {
             label: "Draft",
             value: statusCounts.DRAFT,
-            color: "#d97706",
-            bg: "#fffbeb",
+            icon: Filter,
+            color: "#F59E0B",
+            gradient:
+              "linear-gradient(135deg, #F59E0B, #EF4444)",
+            bg: "linear-gradient(135deg, #FFFBEB, #FEF3C7)",
           },
           {
-            label: "Archived",
-            value: statusCounts.ARCHIVED,
-            color: "#64748b",
-            bg: "#f8fafc",
+            label: "Total Students",
+            value: courses.reduce(
+              (sum, c) => sum + c.maxStudents,
+              0
+            ),
+            icon: Users,
+            color: "#7C3AED",
+            gradient:
+              "linear-gradient(135deg, #7C3AED, #EC4899)",
+            bg: "linear-gradient(135deg, #F5F3FF, #EDE9FE)",
           },
-        ].map((stat) => (
-          <div
-            key={stat.label}
-            style={{
-              background: "white",
-              borderRadius: "12px",
-              padding: "16px 20px",
-              border: "1px solid #f1f5f9",
-              display: "flex",
-              alignItems: "center",
-              gap: "12px",
-            }}
-          >
-            <div
+        ].map((stat, i) => {
+          const Icon = stat.icon
+          return (
+            <motion.div
+              key={stat.label}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.1 }}
+              whileHover={{ y: -4 }}
               style={{
-                width: "40px",
-                height: "40px",
-                borderRadius: "10px",
-                background: stat.bg,
+                background: "white",
+                borderRadius: "20px",
+                padding: "20px",
+                border: "1px solid #F1F5F9",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
                 display: "flex",
                 alignItems: "center",
-                justifyContent: "center",
+                gap: "14px",
+                cursor: "default",
               }}
             >
-              <BookOpen size={20} color={stat.color} />
-            </div>
-            <div>
               <div
                 style={{
-                  fontSize: "24px",
-                  fontWeight: "800",
-                  color: "#1e293b",
-                  lineHeight: 1,
+                  width: "48px",
+                  height: "48px",
+                  borderRadius: "14px",
+                  background: stat.gradient,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  boxShadow: `0 6px 16px ${stat.color}30`,
+                  flexShrink: 0,
                 }}
               >
-                {stat.value}
+                <Icon size={22} color="white" />
               </div>
-              <div
-                style={{
-                  fontSize: "12px",
-                  color: "#94a3b8",
-                  marginTop: "2px",
-                }}
-              >
-                {stat.label}
+              <div>
+                <div
+                  style={{
+                    fontSize: "28px",
+                    fontWeight: "900",
+                    color: "#0F172A",
+                    lineHeight: 1,
+                    letterSpacing: "-0.02em",
+                  }}
+                >
+                  {stat.value}
+                </div>
+                <div
+                  style={{
+                    fontSize: "12px",
+                    color: "#94A3B8",
+                    fontWeight: "500",
+                    marginTop: "2px",
+                  }}
+                >
+                  {stat.label}
+                </div>
               </div>
-            </div>
-          </div>
-        ))}
+            </motion.div>
+          )
+        })}
       </div>
 
       {/* Main Card */}
       <div
         style={{
           background: "white",
-          borderRadius: "16px",
-          border: "1px solid #f1f5f9",
-          boxShadow: "0 1px 4px rgba(0,0,0,0.04)",
+          borderRadius: "24px",
+          border: "1px solid #F1F5F9",
+          boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
           overflow: "hidden",
         }}
       >
-        {/* Card Header */}
+        {/* Toolbar */}
         <div
           style={{
             padding: "20px 24px",
-            borderBottom: "1px solid #f1f5f9",
+            borderBottom: "1px solid #F8FAFC",
           }}
         >
           <div
@@ -234,10 +251,11 @@ export function CoursesPageClient() {
           >
             <h2
               style={{
-                fontSize: "16px",
-                fontWeight: "700",
-                color: "#1e293b",
+                fontSize: "18px",
+                fontWeight: "800",
+                color: "#0F172A",
                 margin: 0,
+                letterSpacing: "-0.01em",
               }}
             >
               All Courses
@@ -250,25 +268,24 @@ export function CoursesPageClient() {
                 gap: "10px",
               }}
             >
-              {/* View Mode Toggle */}
+              {/* View Toggle */}
               <div
                 style={{
                   display: "flex",
-                  background: "#f8fafc",
-                  borderRadius: "8px",
+                  background: "#F1F5F9",
+                  borderRadius: "10px",
                   padding: "3px",
-                  border: "1px solid #e2e8f0",
                 }}
               >
                 {(["grid", "list"] as ViewMode[]).map(
                   (mode) => (
-                    <button
+                    <motion.button
                       key={mode}
-                      type="button"
+                      whileTap={{ scale: 0.95 }}
                       onClick={() => setViewMode(mode)}
                       style={{
-                        padding: "6px 10px",
-                        borderRadius: "6px",
+                        padding: "7px 10px",
+                        borderRadius: "8px",
                         border: "none",
                         background:
                           viewMode === mode
@@ -276,15 +293,14 @@ export function CoursesPageClient() {
                             : "transparent",
                         color:
                           viewMode === mode
-                            ? "#1e293b"
-                            : "#94a3b8",
+                            ? "#0F172A"
+                            : "#94A3B8",
                         cursor: "pointer",
                         boxShadow:
                           viewMode === mode
-                            ? "0 1px 3px rgba(0,0,0,0.1)"
+                            ? "0 1px 4px rgba(0,0,0,0.1)"
                             : "none",
-                        display: "flex",
-                        alignItems: "center",
+                        transition: "all 0.2s ease",
                       }}
                     >
                       {mode === "grid" ? (
@@ -292,14 +308,19 @@ export function CoursesPageClient() {
                       ) : (
                         <List size={16} />
                       )}
-                    </button>
+                    </motion.button>
                   )
                 )}
               </div>
 
-              {/* Add Course Button */}
-              <button
-                type="button"
+              {/* Add Button */}
+              <motion.button
+                whileHover={{
+                  scale: 1.04,
+                  boxShadow:
+                    "0 8px 20px rgba(0,102,255,0.3)",
+                }}
+                whileTap={{ scale: 0.97 }}
                 onClick={() => {
                   setEditingCourse(null)
                   setShowForm(true)
@@ -309,18 +330,20 @@ export function CoursesPageClient() {
                   alignItems: "center",
                   gap: "8px",
                   padding: "10px 20px",
-                  background: "#2563eb",
+                  background:
+                    "linear-gradient(135deg, #0066FF, #6C3AED)",
                   color: "white",
                   border: "none",
-                  borderRadius: "10px",
+                  borderRadius: "12px",
                   fontSize: "13px",
-                  fontWeight: "600",
+                  fontWeight: "700",
                   cursor: "pointer",
+                  boxShadow: "0 4px 14px rgba(0,102,255,0.3)",
                 }}
               >
                 <Plus size={16} />
                 Add Course
-              </button>
+              </motion.button>
             </div>
           </div>
 
@@ -332,7 +355,6 @@ export function CoursesPageClient() {
               flexWrap: "wrap",
             }}
           >
-            {/* Search */}
             <div
               style={{
                 position: "relative",
@@ -342,12 +364,13 @@ export function CoursesPageClient() {
             >
               <Search
                 size={15}
-                color="#94a3b8"
+                color="#94A3B8"
                 style={{
                   position: "absolute",
-                  left: "12px",
+                  left: "14px",
                   top: "50%",
                   transform: "translateY(-50%)",
+                  pointerEvents: "none",
                 }}
               />
               <input
@@ -357,328 +380,611 @@ export function CoursesPageClient() {
                 onChange={(e) => setSearch(e.target.value)}
                 style={{
                   width: "100%",
-                  padding: "10px 14px 10px 36px",
-                  border: "1px solid #e2e8f0",
-                  borderRadius: "10px",
+                  padding: "10px 14px 10px 40px",
+                  border: "1.5px solid #E2E8F0",
+                  borderRadius: "12px",
                   fontSize: "13px",
-                  color: "#1e293b",
-                  background: "white",
+                  color: "#0F172A",
+                  background: "#F8FAFC",
                   outline: "none",
                   boxSizing: "border-box",
+                  transition: "border-color 0.2s ease",
+                }}
+                onFocus={(e) => {
+                  e.target.style.borderColor = "#0066FF"
+                  e.target.style.background = "white"
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = "#E2E8F0"
+                  e.target.style.background = "#F8FAFC"
                 }}
               />
             </div>
 
-            {/* Status Filter */}
-            <div
+            <select
+              value={statusFilter}
+              onChange={(e) =>
+                setStatusFilter(e.target.value)
+              }
               style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-                padding: "10px 14px",
-                border: "1px solid #e2e8f0",
-                borderRadius: "10px",
-                background: "white",
+                padding: "10px 16px",
+                border: "1.5px solid #E2E8F0",
+                borderRadius: "12px",
+                fontSize: "13px",
+                color: "#0F172A",
+                background: "#F8FAFC",
+                outline: "none",
+                cursor: "pointer",
+                fontWeight: "500",
               }}
             >
-              <Filter size={14} color="#64748b" />
-              <select
-                value={statusFilter}
-                onChange={(e) =>
-                  setStatusFilter(e.target.value)
-                }
-                style={{
-                  border: "none",
-                  fontSize: "13px",
-                  color: "#1e293b",
-                  background: "transparent",
-                  outline: "none",
-                  cursor: "pointer",
-                }}
-              >
-                <option value="">All Status</option>
-                <option value="DRAFT">Draft</option>
-                <option value="PUBLISHED">Published</option>
-                <option value="ARCHIVED">Archived</option>
-              </select>
-            </div>
+              <option value="">All Status</option>
+              <option value="PUBLISHED">Published</option>
+              <option value="DRAFT">Draft</option>
+              <option value="ARCHIVED">Archived</option>
+            </select>
           </div>
         </div>
 
-        {/* Content Area */}
+        {/* Content */}
         <div style={{ padding: "24px" }}>
           {/* Loading */}
           {isLoading && (
             <div
               style={{
-                textAlign: "center",
-                padding: "60px",
-                color: "#94a3b8",
+                display: "grid",
+                gridTemplateColumns:
+                  viewMode === "grid"
+                    ? "repeat(auto-fill, minmax(300px, 1fr))"
+                    : "1fr",
+                gap: "16px",
               }}
             >
-              <div
-                style={{
-                  width: "32px",
-                  height: "32px",
-                  border: "3px solid #e2e8f0",
-                  borderTop: "3px solid #2563eb",
-                  borderRadius: "50%",
-                  animation: "spin 0.8s linear infinite",
-                  margin: "0 auto 12px",
-                }}
-              />
-              Loading courses...
+              {[1, 2, 3, 4, 5, 6].map((i) => (
+                <div
+                  key={i}
+                  style={{
+                    height: viewMode === "grid"
+                      ? "260px"
+                      : "80px",
+                    background:
+                      "linear-gradient(90deg, #F1F5F9 25%, #E2E8F0 50%, #F1F5F9 75%)",
+                    backgroundSize: "200% 100%",
+                    animation:
+                      "skeleton 1.5s infinite",
+                    borderRadius: "16px",
+                  }}
+                />
+              ))}
               <style>{`
-                @keyframes spin {
-                  to { transform: rotate(360deg); }
+                @keyframes skeleton {
+                  0% { background-position: 200% 0; }
+                  100% { background-position: -200% 0; }
                 }
               `}</style>
             </div>
           )}
 
-          {/* Empty State */}
+          {/* Empty */}
           {!isLoading && courses.length === 0 && (
-            <div
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
               style={{
+                padding: "80px 40px",
                 textAlign: "center",
-                padding: "60px",
-                color: "#94a3b8",
               }}
             >
               <div
                 style={{
-                  fontSize: "48px",
-                  marginBottom: "16px",
+                  width: "80px",
+                  height: "80px",
+                  background:
+                    "linear-gradient(135deg, #EFF6FF, #DBEAFE)",
+                  borderRadius: "24px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  margin: "0 auto 20px",
                 }}
               >
-                📚
+                <BookOpen size={36} color="#0066FF" />
               </div>
               <h3
                 style={{
-                  fontSize: "18px",
-                  fontWeight: "600",
-                  color: "#1e293b",
+                  fontSize: "20px",
+                  fontWeight: "800",
+                  color: "#0F172A",
                   marginBottom: "8px",
                 }}
               >
                 No courses found
               </h3>
-              <p style={{ marginBottom: "24px" }}>
-                Start by creating your first course
+              <p
+                style={{
+                  color: "#94A3B8",
+                  marginBottom: "24px",
+                  fontSize: "14px",
+                }}
+              >
+                Create your first course to get started
               </p>
-              <button
-                type="button"
+              <motion.button
+                whileHover={{ scale: 1.04 }}
+                whileTap={{ scale: 0.97 }}
                 onClick={() => {
                   setEditingCourse(null)
                   setShowForm(true)
                 }}
                 style={{
                   padding: "12px 28px",
-                  background: "#2563eb",
+                  background:
+                    "linear-gradient(135deg, #0066FF, #6C3AED)",
                   color: "white",
                   border: "none",
-                  borderRadius: "10px",
+                  borderRadius: "14px",
                   fontSize: "14px",
-                  fontWeight: "600",
+                  fontWeight: "700",
                   cursor: "pointer",
+                  boxShadow:
+                    "0 6px 20px rgba(0,102,255,0.35)",
                 }}
               >
                 Create First Course
-              </button>
-            </div>
+              </motion.button>
+            </motion.div>
           )}
 
           {/* Grid View */}
-          {!isLoading &&
-            courses.length > 0 &&
-            viewMode === "grid" && (
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns:
-                    "repeat(auto-fill, minmax(280px, 1fr))",
-                  gap: "20px",
-                }}
-              >
-                {courses.map((course) => (
-                  <CourseCard
-                    key={course.id}
-                    course={course}
-                    onEdit={handleEdit}
-                    onDelete={handleDelete}
-                    onView={handleView}
-                  />
-                ))}
-              </div>
-            )}
-
-          {/* List View */}
-          {!isLoading &&
-            courses.length > 0 &&
-            viewMode === "list" && (
-              <div>
-                {/* List Header */}
-                <div
+          <AnimatePresence>
+            {!isLoading &&
+              courses.length > 0 &&
+              viewMode === "grid" && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
                   style={{
                     display: "grid",
                     gridTemplateColumns:
-                      "2fr 1fr 1fr 1fr 1fr auto",
-                    gap: "16px",
-                    padding: "10px 16px",
-                    background: "#f8fafc",
-                    borderRadius: "8px",
-                    marginBottom: "8px",
+                      "repeat(auto-fill, minmax(300px, 1fr))",
+                    gap: "20px",
                   }}
                 >
-                  {[
-                    "Course",
-                    "Code",
-                    "Credits",
-                    "Status",
-                    "Students",
-                    "",
-                  ].map((h) => (
-                    <div
-                      key={h}
-                      style={{
-                        fontSize: "11px",
-                        fontWeight: "700",
-                        color: "#64748b",
-                        textTransform: "uppercase",
-                        letterSpacing: "0.05em",
-                      }}
-                    >
-                      {h}
-                    </div>
-                  ))}
-                </div>
+                  {courses.map((course, index) => {
+                    const gradient =
+                      COURSE_GRADIENTS[
+                        index % COURSE_GRADIENTS.length
+                      ]
+                    return (
+                      <motion.div
+                        key={course.id}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{
+                          delay: index * 0.06,
+                        }}
+                        whileHover={{
+                          y: -8,
+                          boxShadow:
+                            "0 20px 40px rgba(0,0,0,0.1)",
+                        }}
+                        style={{
+                          background: "white",
+                          borderRadius: "20px",
+                          border: "1px solid #F1F5F9",
+                          overflow: "hidden",
+                          cursor: "pointer",
+                          transition: "all 0.3s ease",
+                        }}
+                        onClick={() =>
+                          router.push(
+                            `/admin/courses/${course.id}`
+                          )
+                        }
+                      >
+                        {/* Card Banner */}
+                        <div
+                          style={{
+                            height: "120px",
+                            background: gradient,
+                            position: "relative",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                          }}
+                        >
+                          {/* Pattern */}
+                          <div
+                            style={{
+                              position: "absolute",
+                              inset: 0,
+                              backgroundImage: `
+                                radial-gradient(circle at 20% 50%, rgba(255,255,255,0.1) 0%, transparent 50%),
+                                radial-gradient(circle at 80% 20%, rgba(255,255,255,0.1) 0%, transparent 50%)
+                              `,
+                            }}
+                          />
 
-                {/* List Rows */}
-                {courses.map((course) => (
+                          {/* Status */}
+                          <div
+                            style={{
+                              position: "absolute",
+                              top: "12px",
+                              left: "12px",
+                            }}
+                            onClick={(e) =>
+                              e.stopPropagation()
+                            }
+                          >
+                            <CourseStatusBadge
+                              status={course.status}
+                            />
+                          </div>
+
+                          {/* Course Initial */}
+                          <div
+                            style={{
+                              width: "56px",
+                              height: "56px",
+                              borderRadius: "16px",
+                              background:
+                                "rgba(255,255,255,0.15)",
+                              border:
+                                "1px solid rgba(255,255,255,0.2)",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              backdropFilter: "blur(10px)",
+                            }}
+                          >
+                            <span
+                              style={{
+                                fontSize: "18px",
+                                fontWeight: "900",
+                                color: "white",
+                              }}
+                            >
+                              {course.code.substring(0, 2)}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Card Body */}
+                        <div style={{ padding: "16px 20px" }}>
+                          <div
+                            style={{
+                              fontSize: "11px",
+                              fontWeight: "700",
+                              color: "#94A3B8",
+                              marginBottom: "4px",
+                              letterSpacing: "0.05em",
+                              textTransform: "uppercase",
+                            }}
+                          >
+                            {course.code}
+                          </div>
+                          <h3
+                            style={{
+                              fontSize: "15px",
+                              fontWeight: "800",
+                              color: "#0F172A",
+                              marginBottom: "6px",
+                              letterSpacing: "-0.01em",
+                            }}
+                          >
+                            {course.title}
+                          </h3>
+
+                          {course.instructor.profile && (
+                            <div
+                              style={{
+                                fontSize: "12px",
+                                color: "#64748B",
+                                marginBottom: "14px",
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "6px",
+                              }}
+                            >
+                              <div
+                                style={{
+                                  width: "20px",
+                                  height: "20px",
+                                  borderRadius: "50%",
+                                  background: gradient,
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  fontSize: "8px",
+                                  fontWeight: "800",
+                                  color: "white",
+                                }}
+                              >
+                                {course.instructor.profile.firstName[0]}
+                              </div>
+                              {
+                                course.instructor.profile
+                                  .firstName
+                              }{" "}
+                              {course.instructor.profile.lastName}
+                            </div>
+                          )}
+
+                          {/* Footer */}
+                          <div
+                            style={{
+                              display: "flex",
+                              justifyContent: "space-between",
+                              alignItems: "center",
+                              paddingTop: "12px",
+                              borderTop: "1px solid #F1F5F9",
+                            }}
+                          >
+                            <div
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "4px",
+                                fontSize: "12px",
+                                color: "#64748B",
+                              }}
+                            >
+                              <Users size={13} />
+                              {course.maxStudents} max
+                            </div>
+                            <div
+                              style={{
+                                fontSize: "12px",
+                                fontWeight: "700",
+                                color: "#0066FF",
+                                background: "#EFF6FF",
+                                padding: "3px 10px",
+                                borderRadius: "20px",
+                              }}
+                            >
+                              {course.credits} credits
+                            </div>
+                          </div>
+                        </div>
+                      </motion.div>
+                    )
+                  })}
+                </motion.div>
+              )}
+          </AnimatePresence>
+
+          {/* List View */}
+          <AnimatePresence>
+            {!isLoading &&
+              courses.length > 0 &&
+              viewMode === "list" && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                >
+                  {/* Header */}
                   <div
-                    key={course.id}
                     style={{
                       display: "grid",
                       gridTemplateColumns:
                         "2fr 1fr 1fr 1fr 1fr auto",
-                      gap: "16px",
-                      padding: "14px 16px",
-                      border: "1px solid #f1f5f9",
-                      borderRadius: "10px",
+                      gap: "12px",
+                      padding: "10px 16px",
+                      background: "#F8FAFC",
+                      borderRadius: "12px",
                       marginBottom: "8px",
-                      alignItems: "center",
-                      background: "white",
-                      cursor: "pointer",
                     }}
-                    onClick={() => handleView(course.id)}
                   >
-                    {/* Course Name */}
-                    <div>
+                    {[
+                      "Course",
+                      "Code",
+                      "Credits",
+                      "Status",
+                      "Capacity",
+                      "",
+                    ].map((h) => (
                       <div
+                        key={h}
                         style={{
-                          fontSize: "14px",
-                          fontWeight: "600",
-                          color: "#1e293b",
+                          fontSize: "11px",
+                          fontWeight: "700",
+                          color: "#64748B",
+                          textTransform: "uppercase",
+                          letterSpacing: "0.06em",
                         }}
                       >
-                        {course.title}
+                        {h}
                       </div>
-                      <div
-                        style={{
-                          fontSize: "12px",
-                          color: "#94a3b8",
-                        }}
-                      >
-                        {course.instructor.profile
-                          ? `${course.instructor.profile.firstName} ${course.instructor.profile.lastName}`
-                          : "Unknown"}
-                      </div>
-                    </div>
-
-                    {/* Code */}
-                    <div
-                      style={{
-                        fontSize: "13px",
-                        color: "#2563eb",
-                        fontWeight: "600",
-                      }}
-                    >
-                      {course.code}
-                    </div>
-
-                    {/* Credits */}
-                    <div
-                      style={{
-                        fontSize: "13px",
-                        color: "#64748b",
-                      }}
-                    >
-                      {course.credits}
-                    </div>
-
-                    {/* Status */}
-                    <CourseStatusBadge status={course.status} />
-
-                    {/* Max Students */}
-                    <div
-                      style={{
-                        fontSize: "13px",
-                        color: "#64748b",
-                      }}
-                    >
-                      {course.maxStudents} max
-                    </div>
-
-                    {/* Actions */}
-                    <div
-                      style={{ display: "flex", gap: "8px" }}
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <button
-                        type="button"
-                        onClick={() => handleEdit(course)}
-                        style={{
-                          padding: "6px 14px",
-                          background: "#eff6ff",
-                          color: "#2563eb",
-                          border: "none",
-                          borderRadius: "6px",
-                          fontSize: "12px",
-                          fontWeight: "600",
-                          cursor: "pointer",
-                        }}
-                      >
-                        Edit
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          if (
-                            confirm(
-                              `Delete "${course.title}"?`
-                            )
-                          ) {
-                            handleDelete(course.id)
-                          }
-                        }}
-                        style={{
-                          padding: "6px 14px",
-                          background: "#fef2f2",
-                          color: "#dc2626",
-                          border: "none",
-                          borderRadius: "6px",
-                          fontSize: "12px",
-                          fontWeight: "600",
-                          cursor: "pointer",
-                        }}
-                      >
-                        Delete
-                      </button>
-                    </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-            )}
+
+                  {/* Rows */}
+                  {courses.map((course, index) => {
+                    const gradient =
+                      COURSE_GRADIENTS[
+                        index % COURSE_GRADIENTS.length
+                      ]
+                    return (
+                      <motion.div
+                        key={course.id}
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: index * 0.05 }}
+                        whileHover={{
+                          backgroundColor: "#FAFBFF",
+                          x: 2,
+                        }}
+                        style={{
+                          display: "grid",
+                          gridTemplateColumns:
+                            "2fr 1fr 1fr 1fr 1fr auto",
+                          gap: "12px",
+                          padding: "14px 16px",
+                          border: "1px solid #F1F5F9",
+                          borderRadius: "14px",
+                          marginBottom: "6px",
+                          alignItems: "center",
+                          cursor: "pointer",
+                          background: "white",
+                          transition: "all 0.15s ease",
+                        }}
+                        onClick={() =>
+                          router.push(
+                            `/admin/courses/${course.id}`
+                          )
+                        }
+                      >
+                        {/* Course */}
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "12px",
+                          }}
+                        >
+                          <div
+                            style={{
+                              width: "36px",
+                              height: "36px",
+                              borderRadius: "10px",
+                              background: gradient,
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              color: "white",
+                              fontSize: "11px",
+                              fontWeight: "800",
+                              flexShrink: 0,
+                            }}
+                          >
+                            {course.code.substring(0, 2)}
+                          </div>
+                          <div>
+                            <div
+                              style={{
+                                fontSize: "14px",
+                                fontWeight: "700",
+                                color: "#0F172A",
+                              }}
+                            >
+                              {course.title}
+                            </div>
+                            {course.instructor.profile && (
+                              <div
+                                style={{
+                                  fontSize: "11px",
+                                  color: "#94A3B8",
+                                }}
+                              >
+                                {
+                                  course.instructor
+                                    .profile.firstName
+                                }{" "}
+                                {
+                                  course.instructor
+                                    .profile.lastName
+                                }
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Code */}
+                        <div
+                          style={{
+                            fontSize: "13px",
+                            fontWeight: "700",
+                            color: "#0066FF",
+                          }}
+                        >
+                          {course.code}
+                        </div>
+
+                        {/* Credits */}
+                        <div
+                          style={{
+                            fontSize: "13px",
+                            color: "#64748B",
+                          }}
+                        >
+                          {course.credits}
+                        </div>
+
+                        {/* Status */}
+                        <CourseStatusBadge
+                          status={course.status}
+                        />
+
+                        {/* Capacity */}
+                        <div
+                          style={{
+                            fontSize: "13px",
+                            color: "#64748B",
+                          }}
+                        >
+                          {course.maxStudents}
+                        </div>
+
+                        {/* Actions */}
+                        <div
+                          style={{
+                            display: "flex",
+                            gap: "8px",
+                          }}
+                          onClick={(e) =>
+                            e.stopPropagation()
+                          }
+                        >
+                          <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            onClick={() => {
+                              setEditingCourse(course)
+                              setShowForm(true)
+                            }}
+                            style={{
+                              padding: "6px 14px",
+                              background: "#EFF6FF",
+                              color: "#0066FF",
+                              border: "none",
+                              borderRadius: "8px",
+                              fontSize: "12px",
+                              fontWeight: "700",
+                              cursor: "pointer",
+                            }}
+                          >
+                            Edit
+                          </motion.button>
+                          <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            onClick={() => {
+                              if (
+                                confirm(
+                                  `Delete "${course.title}"?`
+                                )
+                              ) {
+                                handleDelete(course.id)
+                              }
+                            }}
+                            style={{
+                              padding: "6px 14px",
+                              background: "#FFF1F2",
+                              color: "#E11D48",
+                              border: "none",
+                              borderRadius: "8px",
+                              fontSize: "12px",
+                              fontWeight: "700",
+                              cursor: "pointer",
+                            }}
+                          >
+                            Delete
+                          </motion.button>
+                        </div>
+                      </motion.div>
+                    )
+                  })}
+                </motion.div>
+              )}
+          </AnimatePresence>
         </div>
       </div>
 
