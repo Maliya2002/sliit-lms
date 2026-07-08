@@ -1,6 +1,7 @@
+// components/dashboard/student/dashboard-client.tsx
 "use client"
 
-import { useIsMobile } from "@/hooks/use-mobile"
+import { motion } from "framer-motion"
 import { StatsCards } from "./stats-cards"
 import { MyCourses } from "./my-courses"
 import { UpcomingDeadlines } from "./upcoming-deadlines"
@@ -15,25 +16,47 @@ interface Props {
 }
 
 export function DashboardClient({ stats }: Props) {
-  const { isMobile } = useIsMobile()
-
   return (
-    <div style={{ padding: isMobile ? "16px" : "28px" }}>
+    <div
+      style={{
+        padding: "28px 32px",
+        background: "#F8FAFC",
+        minHeight: "calc(100vh - 76px)",
+      }}
+    >
+      {/* Stats Cards */}
       <StatsCards
         totalCourses={stats.totalCourses}
         pendingAssignments={stats.pendingAssignments}
         attendancePercent={stats.attendancePercent}
         gpa={stats.gpa}
       />
+
+      {/* Main Grid */}
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: isMobile ? "1fr" : "1.5fr 1fr",
-          gap: "20px",
+          gridTemplateColumns: "1.5fr 1fr",
+          gap: "24px",
         }}
       >
-        <MyCourses />
-        <UpcomingDeadlines />
+        {/* Left */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4, duration: 0.5 }}
+        >
+          <MyCourses />
+        </motion.div>
+
+        {/* Right */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5, duration: 0.5 }}
+        >
+          <UpcomingDeadlines />
+        </motion.div>
       </div>
     </div>
   )
