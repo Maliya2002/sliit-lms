@@ -7,6 +7,17 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { signIn } from "next-auth/react"
 import { useRouter, useSearchParams } from "next/navigation"
+import { motion, AnimatePresence } from "framer-motion"
+import {
+  Mail,
+  Lock,
+  Eye,
+  EyeOff,
+  Loader2,
+  CheckCircle,
+  AlertCircle,
+  ArrowRight,
+} from "lucide-react"
 
 const loginSchema = z.object({
   email: z
@@ -33,13 +44,12 @@ export function LoginForm() {
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
 
-  // ── Derive info message from URL params (no useEffect needed) ──
   const infoMessage = useMemo(() => {
     if (registered === "true") {
       return "Account created successfully! Please sign in."
     }
     if (reset === "success") {
-      return "Password reset successfully! Please sign in with your new password."
+      return "Password reset successfully! Sign in with your new password."
     }
     return null
   }, [registered, reset])
@@ -96,118 +106,191 @@ export function LoginForm() {
     }
   }
 
+  const inputWrapperStyle = {
+    position: "relative" as const,
+    marginBottom: "20px",
+  }
+
+  const inputStyle = (hasError: boolean, hasIcon: boolean) => ({
+    width: "100%",
+    padding: `14px ${hasIcon ? "48px" : "16px"} 14px ${
+      hasIcon ? "44px" : "16px"
+    }`,
+    border: `2px solid ${
+      hasError ? "#E11D48" : "#E2E8F0"
+    }`,
+    borderRadius: "14px",
+    fontSize: "15px",
+    color: "#0F172A",
+    background: "#F8FAFC",
+    outline: "none",
+    boxSizing: "border-box" as const,
+    transition: "all 0.2s ease",
+  })
+
+  const iconStyle = {
+    position: "absolute" as const,
+    left: "16px",
+    top: "50%",
+    transform: "translateY(-50%)",
+    color: "#94A3B8",
+    pointerEvents: "none" as const,
+  }
+
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
-
       {/* Info Message */}
-      {infoMessage && !success && (
-        <div
-          style={{
-            background: "#f0fdf4",
-            border: "1px solid #bbf7d0",
-            color: "#16a34a",
-            padding: "12px 16px",
-            borderRadius: "10px",
-            fontSize: "14px",
-            marginBottom: "16px",
-          }}
-        >
-          ✅ {infoMessage}
-        </div>
-      )}
+      <AnimatePresence>
+        {infoMessage && !success && (
+          <motion.div
+            initial={{ opacity: 0, y: -10, height: 0 }}
+            animate={{ opacity: 1, y: 0, height: "auto" }}
+            exit={{ opacity: 0, y: -10, height: 0 }}
+            style={{
+              background:
+                "linear-gradient(135deg, #ECFDF5, #D1FAE5)",
+              border: "1px solid #A7F3D0",
+              color: "#065F46",
+              padding: "14px 16px",
+              borderRadius: "14px",
+              fontSize: "14px",
+              marginBottom: "20px",
+              display: "flex",
+              alignItems: "center",
+              gap: "10px",
+            }}
+          >
+            <CheckCircle size={18} />
+            {infoMessage}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Error */}
-      {error && (
-        <div
-          style={{
-            background: "#fef2f2",
-            border: "1px solid #fecaca",
-            color: "#dc2626",
-            padding: "12px 16px",
-            borderRadius: "10px",
-            fontSize: "14px",
-            marginBottom: "16px",
-          }}
-        >
-          ⚠️ {error}
-        </div>
-      )}
+      <AnimatePresence>
+        {error && (
+          <motion.div
+            initial={{ opacity: 0, y: -10, height: 0 }}
+            animate={{ opacity: 1, y: 0, height: "auto" }}
+            exit={{ opacity: 0, y: -10, height: 0 }}
+            style={{
+              background:
+                "linear-gradient(135deg, #FFF1F2, #FFE4E6)",
+              border: "1px solid #FECDD3",
+              color: "#9F1239",
+              padding: "14px 16px",
+              borderRadius: "14px",
+              fontSize: "14px",
+              marginBottom: "20px",
+              display: "flex",
+              alignItems: "center",
+              gap: "10px",
+            }}
+          >
+            <AlertCircle size={18} />
+            {error}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Success */}
-      {success && (
-        <div
-          style={{
-            background: "#f0fdf4",
-            border: "1px solid #bbf7d0",
-            color: "#16a34a",
-            padding: "12px 16px",
-            borderRadius: "10px",
-            fontSize: "14px",
-            marginBottom: "16px",
-          }}
-        >
-          ✅ Login successful! Redirecting...
-        </div>
-      )}
+      <AnimatePresence>
+        {success && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            style={{
+              background:
+                "linear-gradient(135deg, #ECFDF5, #D1FAE5)",
+              border: "1px solid #A7F3D0",
+              color: "#065F46",
+              padding: "14px 16px",
+              borderRadius: "14px",
+              fontSize: "14px",
+              marginBottom: "20px",
+              display: "flex",
+              alignItems: "center",
+              gap: "10px",
+            }}
+          >
+            <Loader2
+              size={18}
+              style={{ animation: "spin 1s linear infinite" }}
+            />
+            Signing in... Redirecting to dashboard
+            <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Email */}
-      <div style={{ marginBottom: "16px" }}>
+      <div style={inputWrapperStyle}>
         <label
           style={{
             display: "block",
-            fontSize: "14px",
+            fontSize: "13px",
             fontWeight: "600",
             color: "#374151",
-            marginBottom: "6px",
+            marginBottom: "8px",
           }}
         >
           Email Address
         </label>
-        <input
-          {...register("email")}
-          type="email"
-          placeholder="you@sliit.lk"
-          disabled={isLoading || success}
-          style={{
-            width: "100%",
-            padding: "12px 16px",
-            border: `1px solid ${
-              errors.email ? "#ef4444" : "#e2e8f0"
-            }`,
-            borderRadius: "10px",
-            fontSize: "14px",
-            color: "#1e293b",
-            background: "white",
-            outline: "none",
-            boxSizing: "border-box",
-          }}
-        />
+        <div style={{ position: "relative" }}>
+          <Mail size={18} style={iconStyle} />
+          <input
+            {...register("email")}
+            type="email"
+            placeholder="you@sliit.lk"
+            disabled={isLoading || success}
+            style={inputStyle(!!errors.email, true)}
+            onFocus={(e) => {
+              e.target.style.borderColor = "#0066FF"
+              e.target.style.background = "white"
+              e.target.style.boxShadow =
+                "0 0 0 4px rgba(0,102,255,0.1)"
+            }}
+            onBlur={(e) => {
+              e.target.style.borderColor = errors.email
+                ? "#E11D48"
+                : "#E2E8F0"
+              e.target.style.background = "#F8FAFC"
+              e.target.style.boxShadow = "none"
+            }}
+          />
+        </div>
         {errors.email && (
-          <p
+          <motion.p
+            initial={{ opacity: 0, y: -5 }}
+            animate={{ opacity: 1, y: 0 }}
             style={{
-              color: "#ef4444",
+              color: "#E11D48",
               fontSize: "12px",
-              marginTop: "4px",
+              marginTop: "6px",
+              display: "flex",
+              alignItems: "center",
+              gap: "4px",
             }}
           >
+            <AlertCircle size={12} />
             {errors.email.message}
-          </p>
+          </motion.p>
         )}
       </div>
 
       {/* Password */}
-      <div style={{ marginBottom: "20px" }}>
+      <div style={inputWrapperStyle}>
         <div
           style={{
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
-            marginBottom: "6px",
+            marginBottom: "8px",
           }}
         >
           <label
             style={{
-              fontSize: "14px",
+              fontSize: "13px",
               fontWeight: "600",
               color: "#374151",
             }}
@@ -218,32 +301,34 @@ export function LoginForm() {
             href="/forgot-password"
             style={{
               fontSize: "12px",
-              color: "#2563eb",
+              fontWeight: "600",
+              color: "#0066FF",
               textDecoration: "none",
             }}
           >
             Forgot password?
           </a>
         </div>
-
         <div style={{ position: "relative" }}>
+          <Lock size={18} style={iconStyle} />
           <input
             {...register("password")}
             type={showPassword ? "text" : "password"}
             placeholder="Enter your password"
             disabled={isLoading || success}
-            style={{
-              width: "100%",
-              padding: "12px 48px 12px 16px",
-              border: `1px solid ${
-                errors.password ? "#ef4444" : "#e2e8f0"
-              }`,
-              borderRadius: "10px",
-              fontSize: "14px",
-              color: "#1e293b",
-              background: "white",
-              outline: "none",
-              boxSizing: "border-box",
+            style={inputStyle(!!errors.password, true)}
+            onFocus={(e) => {
+              e.target.style.borderColor = "#0066FF"
+              e.target.style.background = "white"
+              e.target.style.boxShadow =
+                "0 0 0 4px rgba(0,102,255,0.1)"
+            }}
+            onBlur={(e) => {
+              e.target.style.borderColor = errors.password
+                ? "#E11D48"
+                : "#E2E8F0"
+              e.target.style.background = "#F8FAFC"
+              e.target.style.boxShadow = "none"
             }}
           />
           <button
@@ -251,108 +336,188 @@ export function LoginForm() {
             onClick={() => setShowPassword(!showPassword)}
             style={{
               position: "absolute",
-              right: "12px",
+              right: "16px",
               top: "50%",
               transform: "translateY(-50%)",
               background: "none",
               border: "none",
               cursor: "pointer",
-              color: "#94a3b8",
-              fontSize: "12px",
+              color: "#94A3B8",
               padding: "4px",
+              display: "flex",
             }}
           >
-            {showPassword ? "Hide" : "Show"}
+            {showPassword ? (
+              <EyeOff size={18} />
+            ) : (
+              <Eye size={18} />
+            )}
           </button>
         </div>
-
         {errors.password && (
-          <p
+          <motion.p
+            initial={{ opacity: 0, y: -5 }}
+            animate={{ opacity: 1, y: 0 }}
             style={{
-              color: "#ef4444",
+              color: "#E11D48",
               fontSize: "12px",
-              marginTop: "4px",
+              marginTop: "6px",
+              display: "flex",
+              alignItems: "center",
+              gap: "4px",
             }}
           >
+            <AlertCircle size={12} />
             {errors.password.message}
-          </p>
+          </motion.p>
         )}
       </div>
 
       {/* Submit */}
-      <button
+      <motion.button
         type="submit"
         disabled={isLoading || success}
+        whileHover={
+          !isLoading && !success
+            ? {
+                scale: 1.02,
+                boxShadow:
+                  "0 8px 25px rgba(0,102,255,0.35)",
+              }
+            : {}
+        }
+        whileTap={
+          !isLoading && !success ? { scale: 0.98 } : {}
+        }
         style={{
           width: "100%",
-          padding: "13px",
-          background: success ? "#16a34a" : "#2563eb",
+          padding: "15px",
+          background: success
+            ? "linear-gradient(135deg, #059669, #10B981)"
+            : "linear-gradient(135deg, #0066FF, #6C3AED)",
           color: "white",
           border: "none",
-          borderRadius: "10px",
+          borderRadius: "14px",
           fontSize: "15px",
-          fontWeight: "600",
-          cursor: isLoading || success ? "not-allowed" : "pointer",
-          marginBottom: "16px",
-          opacity: isLoading ? 0.8 : 1,
+          fontWeight: "700",
+          cursor:
+            isLoading || success ? "not-allowed" : "pointer",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: "10px",
+          boxShadow:
+            "0 4px 16px rgba(0,102,255,0.3)",
+          marginBottom: "24px",
+          opacity: isLoading ? 0.85 : 1,
+          transition: "all 0.2s ease",
         }}
       >
-        {isLoading
-          ? "Signing in..."
-          : success
-          ? "✅ Success!"
-          : "Sign In"}
-      </button>
+        {isLoading ? (
+          <>
+            <Loader2
+              size={18}
+              style={{
+                animation: "spin 1s linear infinite",
+              }}
+            />
+            Signing in...
+          </>
+        ) : success ? (
+          <>
+            <CheckCircle size={18} />
+            Success!
+          </>
+        ) : (
+          <>
+            Sign In
+            <ArrowRight size={18} />
+          </>
+        )}
+      </motion.button>
 
       {/* Divider */}
       <div
         style={{
-          textAlign: "center",
-          color: "#94a3b8",
-          fontSize: "13px",
-          marginBottom: "16px",
+          display: "flex",
+          alignItems: "center",
+          gap: "16px",
+          marginBottom: "24px",
         }}
       >
-        — New to SLIIT LMS? —
+        <div
+          style={{
+            flex: 1,
+            height: "1px",
+            background:
+              "linear-gradient(90deg, transparent, #E2E8F0, transparent)",
+          }}
+        />
+        <span
+          style={{
+            fontSize: "12px",
+            color: "#94A3B8",
+            fontWeight: "500",
+          }}
+        >
+          New to SLIIT LMS?
+        </span>
+        <div
+          style={{
+            flex: 1,
+            height: "1px",
+            background:
+              "linear-gradient(90deg, transparent, #E2E8F0, transparent)",
+          }}
+        />
       </div>
 
       {/* Register Link */}
-      <a
+      <motion.a
         href="/register"
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
         style={{
-          display: "block",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: "8px",
           width: "100%",
-          padding: "13px",
+          padding: "14px",
           background: "white",
-          color: "#1e293b",
-          border: "1px solid #e2e8f0",
-          borderRadius: "10px",
+          color: "#0F172A",
+          border: "2px solid #E2E8F0",
+          borderRadius: "14px",
           fontSize: "15px",
           fontWeight: "600",
-          textAlign: "center",
           textDecoration: "none",
-          marginBottom: "24px",
-          boxSizing: "border-box",
+          marginBottom: "32px",
+          transition: "all 0.2s ease",
+          cursor: "pointer",
         }}
       >
         Create an Account
-      </a>
+        <ArrowRight size={16} color="#6C3AED" />
+      </motion.a>
 
       {/* Demo Credentials */}
       <div
         style={{
-          background: "#f8fafc",
-          border: "1px solid #e2e8f0",
-          borderRadius: "12px",
-          padding: "16px",
+          background: "#F8FAFC",
+          border: "1px solid #E2E8F0",
+          borderRadius: "14px",
+          padding: "16px 20px",
         }}
       >
         <p
           style={{
             fontSize: "12px",
             fontWeight: "700",
-            color: "#1e293b",
-            marginBottom: "10px",
+            color: "#0F172A",
+            marginBottom: "12px",
+            display: "flex",
+            alignItems: "center",
+            gap: "6px",
           }}
         >
           🧪 Demo Credentials
@@ -362,40 +527,53 @@ export function LoginForm() {
             role: "Admin",
             email: "admin@sliit.lk",
             pass: "Admin@123",
+            color: "#E11D48",
           },
           {
             role: "Lecturer",
             email: "silva@sliit.lk",
             pass: "Lecturer@123",
+            color: "#F59E0B",
           },
           {
             role: "Student",
             email: "student@sliit.lk",
             pass: "Student@123",
+            color: "#0066FF",
           },
         ].map((cred) => (
           <div
             key={cred.role}
             style={{
-              fontSize: "12px",
-              color: "#64748b",
-              marginBottom: "4px",
               display: "flex",
+              alignItems: "center",
               gap: "8px",
+              fontSize: "12px",
+              color: "#64748B",
+              marginBottom: "6px",
             }}
           >
             <span
               style={{
-                fontWeight: "600",
-                color: "#374151",
+                fontSize: "11px",
+                fontWeight: "700",
+                color: cred.color,
+                background: `${cred.color}15`,
+                padding: "2px 8px",
+                borderRadius: "6px",
                 minWidth: "60px",
+                textAlign: "center",
               }}
             >
-              {cred.role}:
+              {cred.role}
             </span>
-            <span>{cred.email}</span>
-            <span style={{ color: "#94a3b8" }}>/</span>
-            <span>{cred.pass}</span>
+            <span style={{ color: "#475569" }}>
+              {cred.email}
+            </span>
+            <span style={{ color: "#CBD5E1" }}>/</span>
+            <span style={{ color: "#475569" }}>
+              {cred.pass}
+            </span>
           </div>
         ))}
       </div>
