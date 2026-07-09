@@ -1,6 +1,7 @@
 import { requireRole } from "@/lib/auth-utils"
 import { DashboardHeader } from "@/components/shared/dashboard-header"
 import { studentConfig } from "@/lib/dashboard-config"
+import { SettingsClient } from "@/components/settings/settings-client"
 
 export default async function StudentSettingsPage() {
   const user = await requireRole(["STUDENT"])
@@ -13,13 +14,7 @@ export default async function StudentSettingsPage() {
         title="Settings"
         subtitle="Manage your account settings"
       />
-      <div style={{ padding: "32px", textAlign: "center", color: "#94A3B8" }}>
-        <div style={{ fontSize: "48px", marginBottom: "16px" }}>⚙️</div>
-        <h3 style={{ fontSize: "20px", fontWeight: "800", color: "#0F172A", marginBottom: "8px" }}>
-          Account Settings
-        </h3>
-        <p>Settings page coming soon!</p>
-      </div>
+      <SettingsClient />
     </div>
   )
 }
