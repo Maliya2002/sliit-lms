@@ -3,7 +3,6 @@ import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { db } from "@/lib/db"
 
-// GET — Get single attendance session
 export async function GET(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -37,7 +36,6 @@ export async function GET(
                       firstName: true,
                       lastName: true,
                       studentId: true,
-                      avatar: true,
                     },
                   },
                 },
@@ -54,7 +52,9 @@ export async function GET(
       )
     }
 
-    return NextResponse.json({ session: attendanceSession })
+    return NextResponse.json({
+      session: attendanceSession,
+    })
   } catch (error) {
     console.error("Get session error:", error)
     return NextResponse.json(
@@ -64,7 +64,6 @@ export async function GET(
   }
 }
 
-// DELETE — Delete attendance session
 export async function DELETE(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -83,7 +82,9 @@ export async function DELETE(
 
     const { id } = await params
 
-    await db.attendanceSession.delete({ where: { id } })
+    await db.attendanceSession.delete({
+      where: { id },
+    })
 
     return NextResponse.json({ success: true })
   } catch (error) {
